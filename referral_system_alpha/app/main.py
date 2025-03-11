@@ -21,6 +21,7 @@ def include_router(app):
 def start_application():
 
         app = FastAPI()
+        create_tables()
         configure_static(app)
         include_router(app)
         return app
