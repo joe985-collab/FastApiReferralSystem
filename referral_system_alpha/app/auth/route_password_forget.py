@@ -32,7 +32,7 @@ def create_reset_password_token(email:str):
 
 conf = ConnectionConfig(
     MAIL_USERNAME="bharalijyotirmoy@gmail.com",
-    MAIL_PASSWORD="egmurarabofhnfml",
+    MAIL_PASSWORD="*************",
     MAIL_FROM="bharalijyotirmoy@gmail.com",
     MAIL_PORT=587,
     MAIL_SERVER="smtp.gmail.com",
