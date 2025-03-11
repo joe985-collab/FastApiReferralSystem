@@ -42,3 +42,6 @@ class EmailTemplateSchema(BaseModel):
     username: str
     link_expiry_min: str
     reset_link: str
+
+class User(BaseModel):
+    username: str

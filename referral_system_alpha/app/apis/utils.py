@@ -32,7 +32,8 @@ class OAuth2PwdBearer(OAuth2):
         )    
 
         scheme, param = get_authorization_scheme_param(authorization)
-
+        print("Scheme",scheme)
+        print("param",param)
         if not authorization or scheme.lower() != 'bearer':
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -40,6 +41,6 @@ class OAuth2PwdBearer(OAuth2):
                 headers = {"WWW-Authenticate": "Bearer"}
             )
         else:
-            return None
+            return param
         
-        return param
+        # return param

@@ -16,11 +16,12 @@ from fastapi import status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
 from jose import JWTError
-from schemas import Token
+from schemas import Token, User
 from sqlalchemy.orm import Session
-from apis.security import create_access_token
+from apis.security import create_access_token,decode_token
 
 router = APIRouter()
+oauth2_scheme =  OAuth2PwdBearer(tokenUrl="/token")
 
 def authenticate_user(username:str,password:str,db:Session = Depends(get_db)):
 
@@ -33,6 +34,19 @@ def authenticate_user(username:str,password:str,db:Session = Depends(get_db)):
         return False
     
     return user
+
+def get_current_user(token: str = Depends(oauth2_scheme),db:Session = Depends(get_db)):
+    
+    email = decode_token(token)
+    # print("Email: ",email)
+    user = get_user(username=email,db=db)
+    if not user:
+        raise HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "Invalid authentication credentials",
+            headers = {"WWW-Authenticate":"Bearer"}
+        )
+    return User(username=user.username)
 
 @router.post("/token",response_model=Token)
 def login_for_access_token(
@@ -56,4 +70,3 @@ def login_for_access_token(
     )
     return {"access_token":access_token,"token_type":"bearer"}
 
-oauth2_scheme =  OAuth2PwdBearer(tokenUrl="/login/token")

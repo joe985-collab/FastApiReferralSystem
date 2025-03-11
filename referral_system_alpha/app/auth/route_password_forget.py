@@ -19,6 +19,7 @@ load_dotenv(os.path.join('apis', '.env'))
 
 FORGET_PWD_SECRET_KEY = str(os.getenv("FORGET_PWD_SECRET_KEY"))
 ALGORITHM = str(os.getenv("ALGORITHM"))
+APP_PASSWORD = str(os.getenv("SMTP_PASSOWRD"))
 
 router = APIRouter()
 
@@ -32,7 +33,7 @@ def create_reset_password_token(email:str):
 
 conf = ConnectionConfig(
     MAIL_USERNAME="bharalijyotirmoy@gmail.com",
-    MAIL_PASSWORD="*************",
+    MAIL_PASSWORD=APP_PASSWORD,
     MAIL_FROM="bharalijyotirmoy@gmail.com",
     MAIL_PORT=587,
     MAIL_SERVER="smtp.gmail.com",
