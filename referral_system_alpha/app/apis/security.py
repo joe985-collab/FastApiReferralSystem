@@ -19,12 +19,13 @@ print("*************")
 def create_access_token(data: dict,expires_delta: Optional[timedelta] = None):
     
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc)
-    else:
+    if not expires_delta:
         expire = datetime.now(timezone.utc) + timedelta(minutes=30)
+    else:
+        expire = expires_delta
     
     to_encode.update({'exp': expire})
+    print("data: ",to_encode)
     encoded_jwt = jwt.encode(
         to_encode, SECRET_KEY,ALGORITHM
     )
@@ -36,5 +37,6 @@ def decode_token(token: str):
          payload = jwt.decode(token,SECRET_KEY,ALGORITHM)
          email: str = payload.get("sub")
          return email
-      except JWTError:
+      except JWTError as e:
+         print("error",e)
          return None

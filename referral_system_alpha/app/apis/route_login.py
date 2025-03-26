@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta,timezone,datetime
 
 from apis.utils import OAuth2PwdBearer
 
@@ -38,7 +38,8 @@ def authenticate_user(username:str,password:str,db:Session = Depends(get_db)):
 def get_current_user(token: str = Depends(oauth2_scheme),db:Session = Depends(get_db)):
     
     email = decode_token(token)
-    # print("Email: ",email)
+    print("token",token)
+    print("Email: ",email)
     user = get_user(username=email,db=db)
     if not user:
         raise HTTPException(
@@ -61,7 +62,8 @@ def login_for_access_token(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password"
         )
-    access_token_expires = timedelta(minutes=30)
+    access_token_expires = datetime.now(timezone.utc)+timedelta(minutes=30)
+    print("tken",access_token_expires)
     access_token = create_access_token(
         data = {"sub":user.email}, expires_delta=access_token_expires
     )

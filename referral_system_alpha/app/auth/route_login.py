@@ -49,3 +49,13 @@ async def dashboard(request: Request,current_user: User = Depends(get_current_us
         return templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user})
 
 
+@router.get("/logout")
+def login(response: Response):
+    response = RedirectResponse(url="/login",status_code=status.HTTP_302_FOUND)
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=True,
+        samesite="lax"
+    )
+    return response
