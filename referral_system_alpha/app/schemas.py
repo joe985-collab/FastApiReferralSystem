@@ -1,11 +1,17 @@
 from pydantic import BaseModel,EmailStr,ConfigDict
 # from sqlalchemy import Boolean
+from datetime import datetime
 
 class UserCreate(BaseModel):
 
     username: str
     email: EmailStr
     password: str
+    referral_code: str
+    is_activated: bool
+    activation_token: str
+    token_expires_at: datetime
+
 
 class UserResponse(BaseModel):
 
@@ -22,9 +28,8 @@ class Token(BaseModel):
 
 
 class ForgetPasswordRequest(BaseModel):
-
     email: str
-    
+
 class ResetForgetPassword(BaseModel):
     
     new_password: str

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer,String, Boolean
+from sqlalchemy import Column, Integer,String, Boolean,DateTime
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from database import Base
 
@@ -13,3 +13,6 @@ class User(Base):
     referral_code = Column(String,unique=True)
     referred_by = Column(String)
     created_at = Column(TIMESTAMP(timezone=True))
+    is_activated = Column(Boolean,default=False)
+    activation_token = Column(String, unique=True)
+    token_expires_at = Column(DateTime) 

@@ -100,7 +100,7 @@ async def forget_password(
         )
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail = f"Something Unexpected, Server Error {e}"
+        detail = f"Invalid Email Address"
         )
 
 @router.get("/reset-password/{reset_token}",response_class=HTMLResponse)

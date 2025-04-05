@@ -23,9 +23,9 @@ from apis.security import create_access_token,decode_token
 router = APIRouter()
 oauth2_scheme =  OAuth2PwdBearer(tokenUrl="/token")
 
-def authenticate_user(username:str,password:str,db:Session = Depends(get_db)):
+def authenticate_user(email:str,password:str,db:Session = Depends(get_db)):
 
-    user = get_user(username=username,db=db)
+    user = get_user(email=email,db=db)
 
     if not user:
         return False
@@ -40,7 +40,7 @@ def get_current_user(token: str = Depends(oauth2_scheme),db:Session = Depends(ge
     email = decode_token(token)
     print("token",token)
     print("Email: ",email)
-    user = get_user(username=email,db=db)
+    user = get_user(email=email,db=db)
     if not user:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
@@ -55,7 +55,7 @@ def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
-    user = authenticate_user(form_data.username,form_data.password,db)
+    user = authenticate_user(form_data.email,form_data.password,db)
 
     if not user:
         raise HTTPException(
@@ -63,7 +63,6 @@ def login_for_access_token(
             detail="Incorrect username or password"
         )
     access_token_expires = datetime.now(timezone.utc)+timedelta(minutes=30)
-    print("tken",access_token_expires)
     access_token = create_access_token(
         data = {"sub":user.email}, expires_delta=access_token_expires
     )

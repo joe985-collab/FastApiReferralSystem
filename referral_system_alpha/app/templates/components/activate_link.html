@@ -1,0 +1,12 @@
+{% block title %}
+<title>Password Reset</title>
+{% endblock %}
+
+{% block content %}
+    <p>Hello {{ username }},</p>
+    <p>Thank you for registering with JobBoard. To complete your registration and verify your email address, please activate your account by clicking the link below:</p>
+    <a href="{{ activate_link }}">Link Activation</a>
+    <p><strong>Didn't request this?</strong> If you didn't create an account with us, please ignore this email or <a href="mailto:bharalijyotirmoy@gmail.com">contact support</a>.</p>    <p>This link will expire in {{ link_expiry_min }} minutes.</p>
+    <br>
+    <p>Best regards,<br>Joe</p>
+{% endblock %}

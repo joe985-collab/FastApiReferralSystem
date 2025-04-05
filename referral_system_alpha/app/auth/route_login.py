@@ -27,7 +27,6 @@ async def login(request: Request, db: Session = Depends(get_db)):
 
     form = LoginForm(request)
     await form.load_data()
-
     if await form.is_valid():
 
         try:
@@ -41,7 +40,7 @@ async def login(request: Request, db: Session = Depends(get_db)):
             form.__dict__.update(msg="")
             form.__dict__.get("errors").append("Incorrect Email or Password")
             return templates.TemplateResponse("auth/login.html",form.__dict__)
-        
+    print("error")
     return templates.TemplateResponse("auth/login.html",form.__dict__)
 
 @router.get("/dashboard")
