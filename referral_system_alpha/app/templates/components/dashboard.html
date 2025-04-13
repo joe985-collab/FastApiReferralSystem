@@ -1,0 +1,18 @@
+<!-- templates/protected.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Protected Page</title>
+</head>
+<body>
+    <div>
+        <h1>Welcome, {{ user.username }}!</h1>
+        <p>This page is only available to authenticated users.</p>
+    </div>
+    <div>
+        <form action="/logout" method="get">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+</body>
+</html>
