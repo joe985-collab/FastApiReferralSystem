@@ -19,8 +19,15 @@ router = APIRouter()
 
 
 @router.get("/login")
-def login(request: Request):
-    return templates.TemplateResponse("auth/login.html",{"request": request})
+def login(request: Request,msg:str = "default"):
+    messages = {"reset_password":"Password reset successfully!","default":""}
+    if msg in messages:
+        response =  templates.TemplateResponse("auth/login.html",{"request": request,"msg":messages[msg]})
+        return response
+    else:
+        response =  templates.TemplateResponse("auth/login.html",{"request": request,"errors":["Invalid query"]})
+        return response
+
 
 @router.post("/login")
 async def login(request: Request, db: Session = Depends(get_db)):
@@ -45,11 +52,18 @@ async def login(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/dashboard")
 async def dashboard(request: Request,current_user: User = Depends(get_current_user)):
-        return templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user})
+            try:
+                response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user})
+                response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+                response.headers["Pragma"] = "no-cache"
+                response.headers["Expires"] = "0"
+                return response
+            except HTTPException as e:
+                 return {"error":f"{e.detail}"}
 
 
 @router.get("/logout")
-def login(response: Response):
+def logout(response: Response,current_user:User=Depends(get_current_user)):
     response = RedirectResponse(url="/login",status_code=status.HTTP_302_FOUND)
     response.delete_cookie(
         key="access_token",

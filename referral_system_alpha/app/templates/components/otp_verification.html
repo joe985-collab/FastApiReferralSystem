@@ -34,7 +34,7 @@
         }
         
         .otp-header p {
-            color: #666;
+            color: #4CAF50;
             font-size: 0.9rem;
         }
         
@@ -90,17 +90,21 @@
         
         .error-message {
             color: #f44336;
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-            display: none;
+            font-size: 1rem;
+            margin-bottom: 1rem;
         }
+        
+     
     </style>
 </head>
 <body>
     <div class="otp-container">
         <div class="otp-header">
-            <h2>OTP Verification</h2>
-            <p>Enter the 4-digit code sent to your email</p>
+            <div class="container">
+                {% if message %}
+                    <p class="success"> {{ message }}</p>
+                {% endif %}
+              </div>
         </div>
         
         <form action="/verify-otp" method="POST">
@@ -111,12 +115,15 @@
                 <input type="text" maxlength="1" pattern="[0-9]" required>
             </div>
             <input name="totalOtp" type="hidden" id="totalOtp" />
-            <p class="error-message" id="errorMsg">Invalid OTP. Please try again.</p>
-            
+            <div class="text-danger font-weight-bold">
+            </div>
+            {% for error in errors %}
+                <div class="error-message">{{error}}</div>
+            {% endfor %}
             <button type="submit" class="verify-btn">Verify</button>
         </form>
         
-        <a href="/resend-otp}" class="resend-link">Resend OTP</a>
+        <a href="/resend-otp" class="resend-link">Resend OTP</a>
     </div>
 
     <script>
@@ -165,7 +172,6 @@
  
         // Resend OTP
         document.querySelector('.resend-link').addEventListener('click', (e) => {
-            e.preventDefault();
             alert('New OTP sent to your email!');
             // In real app: Call backend to resend OTP
         });

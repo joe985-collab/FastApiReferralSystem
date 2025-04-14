@@ -11,11 +11,11 @@ class User(Base):
     username = Column(String,unique=True,nullable=False)
     email = Column(String,unique=True,nullable=False)
     password = Column(String,nullable=False)
-    referral_code = Column(String,unique=True)
-    referred_by = Column(String)
+    referral_code = Column(String,unique=True,nullable=True)
+    referred_by = Column(String,nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),server_default=func.now())
-    is_verifed = Column(Boolean,default=False,nullable=False)
-
+    is_verified = Column(Boolean,default=False)
+    
 class VerifyOTP(Base):
 
     __tablename__ = "VerifyOTP"

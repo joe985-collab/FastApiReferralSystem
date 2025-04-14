@@ -1,18 +1,143 @@
-<!-- templates/protected.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Protected Page</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+    }
+
+    header {
+      background-color: #2e86de;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .container {
+      display: flex;
+      padding: 2rem;
+    }
+
+    nav {
+      width: 250px;
+      background-color: #fff;
+      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-right: 2rem;
+      border-radius: 8px;
+    }
+
+    nav a {
+      display: block;
+      padding: 0.75rem;
+      color: #333;
+      text-decoration: none;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+    }
+
+    nav a:hover {
+      background-color: #e8f0fe;
+    }
+
+    .main {
+      flex: 1;
+    }
+
+    .card {
+      background-color: white;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    }
+
+    .card h2 {
+      margin-top: 0;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .product-card {
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .product-card h4 {
+      margin: 0.5rem 0;
+    }
+
+    .btn {
+      background-color: #2e86de;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #1b4f72;
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <h1>Welcome, {{user.username}}</h1>
     <div>
-        <h1>Welcome, {{ user.username }}!</h1>
-        <p>This page is only available to authenticated users.</p>
+      <a href="/logout" style="color:white;">Logout</a>
     </div>
-    <div>
-        <form action="/logout" method="get">
-            <button type="submit">Logout</button>
-        </form>
+  </header>
+
+  <div class="container">
+    <nav>
+      <a href="#">Dashboard</a>
+      <a href="#">My Purchases</a>
+      <a href="#">Referral Rewards</a>
+      <a href="#">Account Settings</a>
+    </nav>
+
+    <div class="main">
+      <div class="card">
+        <h2>Referral Rewards</h2>
+        <p>You registered using a referral code! 🎉</p>
+        <p><strong>Reward Points:</strong> {{reward_points}}</p>
+        <p><strong>Discount Available:</strong> {{discount_percentage}}%</p>
+        <button class="btn">Redeem Now</button>
+      </div>
+
+      <div class="card">
+        <h2>Available Products & Services</h2>
+        <div class="product-grid">
+          <!-- Repeat product-card for each item -->
+          <div class="product-card">
+            <h4>Product 1</h4>
+            <p>$20.00</p>
+            <button class="btn">Buy Now</button>
+          </div>
+          <div class="product-card">
+            <h4>Service A</h4>
+            <p>$15.00</p>
+            <button class="btn">Buy Now</button>
+          </div>
+          <!-- ... -->
+        </div>
+      </div>
     </div>
+  </div>
 </body>
 </html>

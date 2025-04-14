@@ -14,7 +14,6 @@ from typing import Optional
 SESSION_KEY = str(os.getenv("SESSION_KEY"))
 
 cookie_params = CookieParameters(max_age=int(timedelta(minutes=30).total_seconds()))
-print("cookie_params",cookie_params)
 cookie = SessionCookie(
     cookie_name="session_cookie",
     identifier = "general_verifier",
@@ -30,6 +29,9 @@ class TempUserData(BaseModel):
         password: str
         otp: Optional[str] = None
         referral_code: Optional[str] = None
+        referred_by: Optional[str] = None
+        is_verified: bool
+        password_plain: str
         expires_at: Optional[datetime] = datetime.now() + timedelta(minutes=30)
 
 class BasicVerifier(SessionVerifier[UUID, TempUserData]):
@@ -66,7 +68,7 @@ class BasicVerifier(SessionVerifier[UUID, TempUserData]):
     # def session_cooke(self):
     #     return self._session_cookie
     
-    async def verify_session(self, model: TempUserData) -> bool:
+    def verify_session(self, model: TempUserData) -> bool:
         """If the session exists, it is valid"""
         print("Here")
         return model.username is not None

@@ -1,17 +1,16 @@
 from pydantic import BaseModel,EmailStr,ConfigDict
 # from sqlalchemy import Boolean
 from datetime import datetime
+from typing import Optional
 
 class UserCreate(BaseModel):
 
     username: str
     email: EmailStr
     password: str
-    referral_code: str
-    is_activated: bool
-    activation_token: str
-    token_expires_at: datetime
-    is_verified: bool
+    referral_code: Optional[str] = None
+    referred_by: Optional[str] = None
+    created_at: Optional[datetime] = datetime.now()
 
 class UserResponse(BaseModel):
 

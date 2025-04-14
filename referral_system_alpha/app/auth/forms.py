@@ -51,6 +51,7 @@ class RegisterForm:
         self.password = form.get("password")
         self.referral_code = form.get("referral_code")
         self.email = form.get("email")
+        
     async def is_valid(self):
     
          if not self.username:
