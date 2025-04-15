@@ -197,7 +197,6 @@ async def verify_password(request: Request,session_id:UUID = Depends(cookie),ses
              raise HTTPException(400, "Session expired")
         
         form_data = await request.form()
-        print("Session Data",session_data)
         if MyHasher.verify_password(form_data["totalOtp"],session_data.otp):
             session_data.is_verified = True
             # if session_data.referral_code:

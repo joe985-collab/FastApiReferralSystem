@@ -20,6 +20,10 @@ router = APIRouter()
 
 @router.get("/login")
 def login(request: Request,msg:str = "default"):
+
+    if msg=="noauth":
+        response =  templates.TemplateResponse("auth/login.html",{"request": request,"errors":["Not Authenticated!"]})
+        return response
     messages = {"reset_password":"Password reset successfully!","default":""}
     if msg in messages:
         response =  templates.TemplateResponse("auth/login.html",{"request": request,"msg":messages[msg]})
@@ -52,14 +56,21 @@ async def login(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/dashboard")
 async def dashboard(request: Request,current_user: User = Depends(get_current_user)):
-            try:
-                response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user})
-                response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-                response.headers["Pragma"] = "no-cache"
-                response.headers["Expires"] = "0"
-                return response
-            except HTTPException as e:
-                 return {"error":f"{e.detail}"}
+    try:
+        if not current_user:
+             raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="noauth",
+                headers = {"WWW-Authenticate": "Bearer"}
+            )
+        response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user})
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+    except HTTPException as e:
+            # return {"error":f"{e.detail}"}
+            return RedirectResponse(url="/login?msg=noauth",status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/logout")

@@ -38,6 +38,8 @@ def authenticate_user(email:str,password:str,db:Session = Depends(get_db)):
 
 def get_current_user(token: str = Depends(oauth2_scheme),db:Session = Depends(get_db)):
     
+    if not token:
+        return token
     email = decode_token(token)
     user = get_user(email=email,db=db)
     if not user:
