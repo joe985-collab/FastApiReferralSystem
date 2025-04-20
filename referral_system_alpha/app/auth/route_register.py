@@ -27,13 +27,13 @@ from models import User
 load_dotenv(os.path.join('apis', '.env'))
 
 APP_PASSWORD = str(os.getenv("SMTP_PASSOWRD"))
-EMAIL_ADD = os.getenv("EMAIL_ADD")
+EMAIL_ADD = str(os.getenv("EMAIL_ADD"))
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
 
 conf = ConnectionConfig(
-    MAIL_USERNAME="bharalijyotirmoy@gmail.com",
+    MAIL_USERNAME=EMAIL_ADD,
     MAIL_PASSWORD=APP_PASSWORD,
     MAIL_FROM=EMAIL_ADD,
     MAIL_PORT=587,
