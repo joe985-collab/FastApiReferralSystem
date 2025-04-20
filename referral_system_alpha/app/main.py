@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Depends
+from fastapi import FastAPI,Depends,Request
 from sqlalchemy.orm import Session
 import models
 from database import engine
@@ -11,7 +11,8 @@ from auth.TwoFA_Session import backend,cookie,verifier
 from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
-
+from fastapi.responses import RedirectResponse
+from fastapi.exceptions import HTTPException
 load_dotenv(os.path.join('apis', '.env'))
 
 
@@ -37,6 +38,10 @@ def start_application():
         return app
 
 app = start_application()
+
+@app.exception_handler(404)
+async def not_found_exception_handler(request:Request,exc:HTTPException):
+       return RedirectResponse(url="/login")
 # @app.post("/users/",response_model=schemas.UserResponse,status_code=201)
 # def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         

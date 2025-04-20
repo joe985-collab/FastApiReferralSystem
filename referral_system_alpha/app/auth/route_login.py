@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from auth.forms import LoginForm
 from fastapi.responses import RedirectResponse
 from schemas import User
-
+# Learn about webauthn library, fido and passkeys
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
@@ -19,18 +19,22 @@ router = APIRouter()
 
 
 @router.get("/login")
-def login(request: Request,msg:str = "default"):
+def login(request: Request,msg:str = "default",err:str=""):
 
-    if msg=="noauth":
-        response =  templates.TemplateResponse("auth/login.html",{"request": request,"errors":["Not Authenticated!"]})
-        return response
+
+    errors = {"noauth":"Not Authenticated!","invalid_session":"Invalid Session. Kindly register first."}
     messages = {"reset_password":"Password reset successfully!","default":""}
+
+    if err:
+        response =  templates.TemplateResponse("auth/login.html",{"request": request,"errors":[errors[err]]})
+        return response
     if msg in messages:
         response =  templates.TemplateResponse("auth/login.html",{"request": request,"msg":messages[msg]})
         return response
     else:
         response =  templates.TemplateResponse("auth/login.html",{"request": request,"errors":["Invalid query"]})
         return response
+
 
 
 @router.post("/login")
@@ -70,7 +74,7 @@ async def dashboard(request: Request,current_user: User = Depends(get_current_us
         return response
     except HTTPException as e:
             # return {"error":f"{e.detail}"}
-            return RedirectResponse(url="/login?msg=noauth",status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(url="/login?err=noauth",status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/logout")

@@ -27,13 +27,15 @@ from models import User
 load_dotenv(os.path.join('apis', '.env'))
 
 APP_PASSWORD = str(os.getenv("SMTP_PASSOWRD"))
+EMAIL_ADD = os.getenv("EMAIL_ADD")
+
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
 
 conf = ConnectionConfig(
     MAIL_USERNAME="bharalijyotirmoy@gmail.com",
     MAIL_PASSWORD=APP_PASSWORD,
-    MAIL_FROM="bharalijyotirmoy@gmail.com",
+    MAIL_FROM=EMAIL_ADD,
     MAIL_PORT=587,
     MAIL_SERVER="smtp.gmail.com",
     MAIL_STARTTLS=True,
@@ -146,7 +148,7 @@ async def register(request: Request, db: Session = Depends(get_db)):
             # print("New user",new_user)   
             await backend.create(session_id, new_user)
 
-            await send_mail(eml=new_user.email,user=new_user,session_id=session_id) 
+            # await send_mail(eml=new_user.email,user=new_user,session_id=session_id) 
             # stored_data = await backend.read(session_id)
             # print("Cookie Stat",stored_data)
             if check_item_by_name_exists(db,form.username,form.email):
@@ -171,16 +173,19 @@ async def register(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/resend-otp")
 async def resend_otp(request:Request,response:Response,session_id:UUID = Depends(cookie),session_data: TempUserData = Depends(verifier)):
-    if not session_data:
-        raise HTTPException(status_code=403, detail="Invalid session") 
-    
-    if datetime.now() >= session_data.expires_at:
-             await backend.delete(session_id)
-             cookie.delete_from_response(response)
-             raise HTTPException(400, "Session expired")
-    await send_mail(eml=session_data.email,user=session_data,session_id=session_id)
-    response =  templates.TemplateResponse("components/otp_verification.html",{"request":request,"message":"A 4 digit OTP has been resent to your email. Kindly check and verify."})
-    return response
+    try:
+        if not session_data or session_id:
+            raise HTTPException(status_code=403, detail="Invalid session") 
+        
+        if datetime.now() >= session_data.expires_at:
+                await backend.delete(session_id)
+                cookie.delete_from_response(response)
+                raise HTTPException(400, "Session expired")
+        await send_mail(eml=session_data.email,user=session_data,session_id=session_id)
+        response =  templates.TemplateResponse("components/otp_verification.html",{"request":request,"message":"A 4 digit OTP has been resent to your email. Kindly check and verify."})
+        return response
+    except Exception as e:
+        return RedirectResponse(url="/login?err=invalid_session",status_code=status.HTTP_303_SEE_OTHER)
 # def get_current_user(session_data: TempUserData = Depends(verifier)) -> TempUserData:
 #     return session_data
 
