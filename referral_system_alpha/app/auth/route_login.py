@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from auth.forms import LoginForm
 from fastapi.responses import RedirectResponse
 from schemas import User
+from datetime import datetime
 # Learn about webauthn library, fido and passkeys
 
 templates = Jinja2Templates(directory="templates")
@@ -67,7 +68,7 @@ async def dashboard(request: Request,current_user: User = Depends(get_current_us
                 detail="noauth",
                 headers = {"WWW-Authenticate": "Bearer"}
             )
-        response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user})
+        response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user,"default_image":"images/ava.jpg", "today":datetime.today().strftime('%Y-%m-%d')})
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"

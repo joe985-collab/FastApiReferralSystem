@@ -5,6 +5,7 @@ from database import engine
 import schemas
 from apis.base import api_router_apis
 from auth.base import api_router_auth
+from dashboard.base import api_router_dashboard
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from auth.TwoFA_Session import backend,cookie,verifier
@@ -27,7 +28,8 @@ def create_tables():
 def include_router(app):
         app.include_router(api_router_apis)
         app.include_router(api_router_auth)
-
+        app.include_router(api_router_dashboard)
+        
 def start_application():
 
         app = FastAPI()

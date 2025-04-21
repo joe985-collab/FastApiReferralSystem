@@ -4,11 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background-color: #f4f6f9;
+    }
+
+    .thumbnail-container {
+      position: relative;
+      margin-bottom: 20px;
+      overflow: hidden; /* Keeps child elements (like caption) inside rounded borders */
+    }
+
+    /* Fix: Image fills container and respects rounded corners */
+    .thumbnail-img {
+      /* max-width: 200px;
+      height: auto;
+      /* transition: transform 0.3s ease; */
+      cursor: pointer; 
+      border-radius: 50%;
+      width: 150px;
+
+    }
+
+    /* Fix: Caption width matches image */
+    .thumbnail-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      color: white;
+      padding: 10px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      width: 160px; /* Ensures caption doesn't overflow */
     }
 
     header {
@@ -29,7 +60,6 @@
       width: 250px;
       background-color: #fff;
       padding: 1rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       margin-right: 2rem;
       border-radius: 8px;
     }
@@ -93,6 +123,46 @@
     .btn:hover {
       background-color: #1b4f72;
     }
+    .thumbnail-img:hover {
+      transform: scale(1.03);
+    }
+
+    .thumbnail-container:hover .thumbnail-caption {
+      opacity: 1;
+    }
+    .upload-box {
+      position: absolute;
+      width: 0;
+      height: 0;
+      background-color: rgba(200, 0, 100, 0.4);  
+      color: white;
+      display: grid;
+      place-items:center;
+      font-size: 16px;
+      border-radius: 10px;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.5s ease;
+      z-index: 10; /* Ensure it appears on top */
+    }
+    
+    /* Upload box visible state */
+    .upload-box.visible {
+      width: 760px;
+      height: 400px;
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .upload-box.invisible {
+      width: 300px;
+      height: 200px;
+      opacity: 1;
+      transform: scale(0);
+    }
+    .upload-box.active {
+      background-color: rgba(210, 90, 150, 0.4);
+    }
   </style>
 </head>
 <body>
@@ -105,21 +175,42 @@
 
   <div class="container">
     <nav>
-      <a href="#">Dashboard</a>
-      <a href="#">My Purchases</a>
-      <a href="#">Referral Rewards</a>
-      <a href="#">Account Settings</a>
+      <div class="row">
+        <!-- Thumbnail 1 -->
+        <div class="col-md-8 col-sm-6 thumbnail-container">
+          {% set dynamic_var = default_image %}
+          <img src="{{ url_for('static', path=dynamic_var) }}" alt="Sample Image 1" class="thumbnail-img">
+          <div class="thumbnail-caption rounded-bottom text-center" style="font-size: 0.5rem;">
+            <h5>{{user.username}}</h5>
+            <p class="mb-0">{{today}}</p>
+          </div>
+      </div>      
+      <div>
+        <a href="#">Dashboard</a>
+        <a href="#">My Purchases</a>
+        <a href="#">Referral Rewards</a>
+        <a href="#">Account Settings</a>
+      </div>
     </nav>
-
     <div class="main">
       <div class="card">
         <h2>Referral Rewards</h2>
         <p>You registered using a referral code! 🎉</p>
-        <p><strong>Reward Points:</strong> {{reward_points}}</p>
-        <p><strong>Discount Available:</strong> {{discount_percentage}}%</p>
+        <p><strong>Reward Points:</strong> 99999999 </p>
+        <p><strong>Discount Available:</strong> 20%</p>
         <button class="btn">Redeem Now</button>
+       <div class="upload-box" id="uploadBox">
+          <form action="/upload_image" method="post" enctype="multipart/form-data">
+            <div>
+              <p>Drag and drop your image here.</p>
+            </div>
+            <div>
+              <input type="file" name="file" id="fileInput">
+              <button id="uploadButton">Submit</button>
+            </div>
+          </form>
+       </div>
       </div>
-
       <div class="card">
         <h2>Available Products & Services</h2>
         <div class="product-grid">
@@ -139,5 +230,7 @@
       </div>
     </div>
   </div>
+  <script src="{{ url_for('static', path='js/dashboard_script.js') }}"></script>
+
 </body>
 </html>
