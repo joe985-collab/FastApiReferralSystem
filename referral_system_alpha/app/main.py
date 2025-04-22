@@ -44,6 +44,7 @@ app = start_application()
 @app.exception_handler(404)
 async def not_found_exception_handler(request:Request,exc:HTTPException):
        return RedirectResponse(url="/login")
+
 # @app.post("/users/",response_model=schemas.UserResponse,status_code=201)
 # def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         

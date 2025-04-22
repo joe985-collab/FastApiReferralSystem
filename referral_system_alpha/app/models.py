@@ -15,6 +15,7 @@ class User(Base):
     referred_by = Column(String,nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),server_default=func.now())
     is_verified = Column(Boolean,default=False)
+    last_active = Column(TIMESTAMP(timezone=True),nullable=True)
     
 class VerifyOTP(Base):
 

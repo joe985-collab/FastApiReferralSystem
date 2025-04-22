@@ -20,6 +20,7 @@ from schemas import Token, User
 from sqlalchemy.orm import Session
 from apis.security import create_access_token,decode_token
 from auth.TwoFA_Session import TempUserData
+from datetime import datetime
 
 router = APIRouter()
 oauth2_scheme =  OAuth2PwdBearer(tokenUrl="/token")
@@ -30,24 +31,25 @@ def authenticate_user(email:str,password:str,db:Session = Depends(get_db)):
 
     if not user:
         return False
-    print(MyHasher.verify_password(password,user.password))
     if not MyHasher.verify_password(password,user.password):
         return False
     
     return user
 
+
 def get_current_user(token: str = Depends(oauth2_scheme),db:Session = Depends(get_db)):
     
     if not token:
-        return token
+        return None
     email = decode_token(token)
     user = get_user(email=email,db=db)
     if not user:
-        raise HTTPException(
-            status_code = status.HTTP_401_UNAUTHORIZED,
-            detail = "Invalid authentication credentials",
-            headers = {"WWW-Authenticate":"Bearer"}
-        )
+        return None
+    #     raise HTTPException(
+    #         status_code = status.HTTP_401_UNAUTHORIZED,
+    #         detail = "Invalid authentication credentials",
+    #         headers = {"WWW-Authenticate":"Bearer"}
+    #     )
     return User(username=user.username)
 
 @router.post("/token",response_model=Token)
@@ -63,14 +65,21 @@ def login_for_access_token(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password"
         )
-    access_token_expires = datetime.now(timezone.utc)+timedelta(minutes=30)
+    access_token_expires = datetime.now(timezone.utc)+timedelta(minutes=5)
+    refresh_token_expires = datetime.now(timezone.utc)+timedelta(days=7)
     access_token = create_access_token(
         data = {"sub":user.email}, expires_delta=access_token_expires
+    )
+    refresh_token = create_access_token(
+        data = {"sub":user.email}, expires_delta=refresh_token_expires
     )
     response.set_cookie(
         key="access_token", value=f"Bearer {access_token}", httponly=True
     )
-    return {"access_token":access_token,"token_type":"bearer"}
+    response.set_cookie(
+        key="refresh_token", value=f"Bearer {refresh_token}", httponly=True
+    )
+    return {"access_token":access_token, "refresh_token":refresh_token,"token_type":"bearer"}
 
 @router.post("/token",response_model=Token)
 def login_for_access_token_register(
@@ -86,11 +95,17 @@ def login_for_access_token_register(
             detail="Incorrect username or password"
         )
     access_token_expires = datetime.now(timezone.utc)+timedelta(minutes=30)
+    refresh_token_expires = datetime.now(timezone.utc)+timedelta(days=7)
     access_token = create_access_token(
         data = {"sub":user.email}, expires_delta=access_token_expires
+    )
+    refresh_token = create_access_token(
+        data = {"sub":user.email}, expires_delta=refresh_token_expires
     )
     response.set_cookie(
         key="access_token", value=f"Bearer {access_token}", httponly=True
     )
-    return {"access_token":access_token,"token_type":"bearer"}
-
+    response.set_cookie(
+        key="refresh_token", value=f"Bearer {refresh_token}", httponly=True
+    )
+    return {"access_token":access_token, "refresh_token":refresh_token,"token_type":"bearer"}

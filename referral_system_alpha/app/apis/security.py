@@ -29,6 +29,14 @@ def create_access_token(data: dict,expires_delta: Optional[timedelta] = None):
 
     return encoded_jwt
 
+def get_exp_token(token:str):
+      try:
+         payload = jwt.decode(token,SECRET_KEY,ALGORITHM)
+         return datetime.fromtimestamp(payload.get("exp"))
+      except JWTError as e:
+         print("error",e)
+         return None
+      
 def decode_token(token: str):
       try:
          payload = jwt.decode(token,SECRET_KEY,ALGORITHM)
