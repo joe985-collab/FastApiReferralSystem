@@ -20,6 +20,13 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
+class Image:
+
+    user_id: int
+    file_name: str
+    file_path: str
+    file_size_kb: str
+    
 class Token(BaseModel):
     
     access_token: str

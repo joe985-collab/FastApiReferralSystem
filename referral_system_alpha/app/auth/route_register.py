@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 from random import randint
 from auth.TwoFA_Session import backend,TempUserData,cookie,verifier
 from uuid import UUID, uuid4
-from models import User
+from models import User,ImageMetadata
 
 
 load_dotenv(os.path.join('apis', '.env'))
@@ -209,7 +209,9 @@ async def verify_password(request: Request,session_id:UUID = Depends(cookie),ses
             # else:
             #     required_data = UserCreate(username=session_data.username,password=session_data.password,email=session_data.email)
             db_user = User(**session_data.model_dump(exclude={"otp","expires_at","password_plain"}))
+            image_meta = ImageMetadata(user_id=db_user.id,file_name="default_pic.png",file_path="static/images/default_pic.png",file_size_kb=20)
             db.add(db_user)
+            db.add(image_meta)
             db.commit()
             db.refresh(db_user)
             db.close()

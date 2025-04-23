@@ -16,7 +16,18 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True),server_default=func.now())
     is_verified = Column(Boolean,default=False)
     last_active = Column(TIMESTAMP(timezone=True),nullable=True)
-    
+
+class ImageMetadata(Base):
+     
+     __tablename__ = "ImageMetadata"
+
+     id = Column(Integer,primary_key=True,index=True)
+     user_id = Column(Integer,unique=True,nullable=False)
+     file_name = Column(String(255),unique=True)
+     file_path = Column(String(255),unique=True)
+     file_size_kb = Column(String(255),unique=True)
+     created_date = Column(TIMESTAMP(timezone=True),server_default=func.now())
+
 class VerifyOTP(Base):
 
     __tablename__ = "VerifyOTP"

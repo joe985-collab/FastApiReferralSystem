@@ -9,15 +9,18 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from auth.forms import LoginForm
 from fastapi.responses import RedirectResponse
-from schemas import User
 from datetime import datetime
+from sqlalchemy.orm import Session
+from models import User,ImageMetadata
+from database import get_db
+import os
 # Learn about webauthn library, fido and passkeys
-
+os.chdir(os.getcwd())
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
 
 @router.post("/upload_image")
-def uploadImage(request:Request,file:UploadFile = File(...),current_user: User=Depends(get_current_user)):
+def uploadImage(request:Request,file:UploadFile = File(...),current_user: User=Depends(get_current_user),db=Depends(get_db) ):
 
     try:
         if not current_user:
@@ -30,6 +33,18 @@ def uploadImage(request:Request,file:UploadFile = File(...),current_user: User=D
             contents = file.file.read()
             with open(f"static/images/{file.filename}","wb") as f:
                 f.write(contents)
+            user = db.query(User).filter(User.username == current_user.username).first()
+            file_name = file.filename
+            file_path = f"static/images/{file.filename}"
+            file_size_kb = os.stat(f"static/images/{file.filename}").st_size/1024
+            new_image = db.query(ImageMetadata).filter(ImageMetadata.user_id == str(user.id)).first()
+            print("New_image",new_image.file_path)
+            new_image.file_name = file_name
+            new_image.file_path = file_path
+            new_image.file_size_kb = file_size_kb
+            db.commit()
+            db.refresh(new_image)
+            db.close()
         except Exception as e:
              raise HTTPException(status_code=500, detail=f'Something went wrong {e}')
         finally:

@@ -1,4 +1,4 @@
-from apis.route_login import login_for_access_token, get_current_user,oauth2_scheme
+from apis.route_login import login_for_access_token, get_current_user,get_current_image_path,oauth2_scheme
 from database import get_db
 from fastapi import APIRouter,Cookie
 from fastapi import Depends
@@ -13,6 +13,7 @@ from schemas import User
 from datetime import timedelta,timezone,datetime
 from apis.security import create_access_token,get_exp_token
 import models
+from datetime import datetime
 # Learn about webauthn library, fido and passkeys
 
 templates = Jinja2Templates(directory="templates")
@@ -75,7 +76,7 @@ async def track_activity(user: User=Depends(get_current_user),db: Session = Depe
 
 
 
-def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_token"),access_token:str=Depends(oauth2_scheme),db:Session = Depends(get_db),user:User=Depends(get_current_user)):
+def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_token"),access_token:str=Depends(oauth2_scheme),db:Session = Depends(get_db),user:User=Depends(get_current_user),image_path:str = Depends(get_current_image_path)):
      if user:
         print("Hereeee",refresh_token)
         print("Hereeee2",access_token)
@@ -93,7 +94,7 @@ def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_to
                     new_refresh_token = create_access_token(
                         data = {"sub":my_user.email}, expires_delta=refresh_token_expires
                     )
-                    response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": user,"default_image":"images/ava.jpg", "today":datetime.today().strftime('%Y-%m-%d')})
+                    response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": user,"default_image":f"images/{image_path}", "today":datetime.today().strftime('%Y-%m-%d')})
                     response.set_cookie(
                         key="access_token", value=f"Bearer {new_access_token}", httponly=True
                     )
@@ -104,7 +105,7 @@ def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_to
        
 
 @router.get("/dashboard")
-async def dashboard(request: Request,current_user: User = Depends(get_current_user),_: str = Depends(track_activity),response:None = Depends(refresh_token)):
+async def dashboard(request: Request,current_user: User = Depends(get_current_user),image_path:str = Depends(get_current_image_path),_: str = Depends(track_activity),response:None = Depends(refresh_token)):
     try:
         if response:
             response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -117,7 +118,7 @@ async def dashboard(request: Request,current_user: User = Depends(get_current_us
                 detail="noauth",
                 headers = {"WWW-Authenticate": "Bearer"}
             )
-        response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user,"default_image":"images/ava.jpg", "today":datetime.today().strftime('%Y-%m-%d')})
+        response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user,"default_image":f"images/{image_path}", "today":datetime.today().strftime('%Y-%m-%d')})
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"

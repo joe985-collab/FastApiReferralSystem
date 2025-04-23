@@ -46,14 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Add a click event listener to the thumbnail
    
     thumbnail.addEventListener("click", () => {
-      if(uploadBox.classList.contains("invisible")){
-        uploadBox.classList.remove("invisible")
-      }
-      console.log("Here")
-      uploadBox.classList.add("visible");
+      uploadBox.classList.toggle("visible");
     });
     uploadBox.addEventListener("click",()=>{
-
-      uploadBox.classList.add("invisible");
+      uploadBox.classList.toggle("visible");
     })
   });
