@@ -6,6 +6,7 @@
   <title>User Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -20,13 +21,11 @@
 
     /* Fix: Image fills container and respects rounded corners */
     .thumbnail-img {
-      /* max-width: 200px;
-      height: auto;
-      /* transition: transform 0.3s ease; */
-      cursor: pointer; 
-      border-radius: 50%;
-      width: 150px;
-
+      width: 140px;          /* Fixed width */
+      height: 140px;         /* Fixed height (must match width for a perfect circle) */
+      object-fit: cover;     /* Ensures the image covers the area without stretching */
+      border-radius: 50%;    /* Makes it circular */
+      cursor: pointer;
     }
 
     /* Fix: Caption width matches image */
@@ -136,19 +135,16 @@
     
     /* Upload box visible state */
     .upload-box.visible {
- 
       opacity: 1;
       transform: translate(-50%, -50%) scale(1);
-    
-      
     }
     
     .upload-box {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 800px;
-      height: 400px;
+      width: 600px;
+      height: 200px;
       display: grid;
       place-items: center;
       background: linear-gradient(45deg, rgba(79, 172, 254, 0.5),rgba(0, 242, 254, 0.5));
@@ -163,9 +159,11 @@
       transform-style: preserve-3d;
       transform: translate(-50%, -50%) scale(0);
     }
+    
     .upload-box.active {
       background-color: rgba(210, 90, 150, 0.4);
     }
+
   </style>
 </head>
 <body>
