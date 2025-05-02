@@ -36,3 +36,15 @@ class VerifyOTP(Base):
     hashed_otp = Column(String,nullable=False)
     created_at = Column(TIMESTAMP(timezone=True),server_default=func.now())
     expires_at = Column(DateTime)
+
+class ReferralTableM(Base):
+
+     __tablename__ = "ReferralTable"
+
+     id = Column(Integer,primary_key=True,index=True)
+     referrer_id = Column(Integer,unique=True,nullable=False)
+     referred_user_id = Column(Integer,nullable=False)
+     date_referred = Column(TIMESTAMP(timezone=True),server_default=func.now())
+     status = Column(String,nullable=True)
+
+

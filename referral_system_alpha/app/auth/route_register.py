@@ -21,8 +21,8 @@ from dotenv import load_dotenv
 from random import randint
 from auth.TwoFA_Session import backend,TempUserData,cookie,verifier
 from uuid import UUID, uuid4
-from models import User,ImageMetadata
-
+from models import User,ImageMetadata,ReferralTableM
+from schemas import UserCreate,ReferralTable
 
 load_dotenv(os.path.join('apis', '.env'))
 
@@ -132,6 +132,66 @@ def register(request: Request):
         #     # form.__dict__.get("errors").append(f"{e.detail}")
         #     return templates.TemplateResponse("auth/register.html",form.__dict__)
 
+def get_referral_code():
+    with open("store_code.txt","r",encoding="utf-8") as f:
+        rest = f.readlines()
+        ref_code = rest[0].replace("\n","")
+        with open("store_code.txt","w",encoding="utf-8") as fw:
+            if len(rest):
+                fw.writelines(rest[1:])
+            else:
+                return "Error"
+    return ref_code
+
+@router.post("/test-register")
+async def test_register(request:Request, db: Session = Depends(get_db)):
+    
+    response = await request.json()
+    test_email = response.get("email")
+    test_username = response.get("username")
+    hashed_password = MyHasher.hash_password(response.get("password"))
+
+    if not response.get("ref_code"):
+         ref_code = get_referral_code()
+         new_user = UserCreate(username=test_username,email=test_email,password=hashed_password,referral_code=ref_code)
+         db_user = User(**new_user.model_dump())
+         db.add(db_user)
+         db.commit()
+         db.close()
+         return {"message":"registration success"}
+    else:
+         ref_code = response.get("ref_code")
+         referrer =  db.query(User.username,User.id).filter(
+                    User.referral_code == ref_code
+                ).first()
+         if not referrer:
+             return {"error":"Invalid referral code"}
+         new_ref_code = get_referral_code()
+         new_user = UserCreate(username=test_username,email=test_email,password=hashed_password,referral_code=new_ref_code,referred_by=referrer.username)
+         db_user = User(**new_user.model_dump())
+         print("db user id",db_user.id)
+      
+         db.add(db_user)
+         db.commit()
+         usr_id = db.query(User.id).filter(
+             User.referral_code == new_ref_code
+         ).first()
+         print("usr id",usr_id)
+         referred_user = ReferralTable(referrer_id=referrer.id,referred_user_id=usr_id.id,status="active")
+         db_ref = ReferralTableM(**referred_user.model_dump())
+         db.add(db_ref)
+         db.commit()
+         db.close()
+         return {"message":"registration success"}
+
+        
+
+
+
+
+
+    # return request.json()
+
 @router.post("/register")
 async def register(request: Request, db: Session = Depends(get_db)):
 
@@ -157,8 +217,8 @@ async def register(request: Request, db: Session = Depends(get_db)):
                 if not check_item_by_referral_code_exists(db,form.referral_code):
                     raise HTTPException(status_code=400,detail="Referral code not found")
                 new_user.referral_code = form.referral_code
-                new_user.referred_by = db.query(models.User.username).filter(
-                    models.User.referral_code == form.referral_code
+                new_user.referred_by = db.query(User.username).filter(
+                    User.referral_code == form.referral_code
                 ).first()
             response = templates.TemplateResponse("components/otp_verification.html",{"request":request,"register_form":form,"message":"An 4 digit OTP has been sent to your email. Kindly check and verify."})
             cookie.attach_to_response(response, session_id)

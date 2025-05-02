@@ -12,6 +12,13 @@ class UserCreate(BaseModel):
     referred_by: Optional[str] = None
     created_at: Optional[datetime] = datetime.now()
 
+class ReferralTable(BaseModel):
+
+    referrer_id: int
+    referred_user_id: int
+    date_referred: Optional[datetime] = datetime.now()
+    status: Optional[str] = None
+    
 class UserResponse(BaseModel):
 
     username: str
