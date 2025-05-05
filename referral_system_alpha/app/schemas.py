@@ -30,9 +30,9 @@ class UserResponse(BaseModel):
 class Image:
 
     user_id: int
-    file_name: str
-    file_path: str
-    file_size_kb: str
+    file_name: Optional[str] = None
+    file_path: Optional[str] = None
+    file_size_kb: Optional[str] = None
     
 class Token(BaseModel):
     

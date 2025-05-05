@@ -46,6 +46,18 @@ conf = ConnectionConfig(
     VALIDATE_CERTS = True,
     TEMPLATE_FOLDER = "templates"
 )
+# conf = ConnectionConfig(
+#     MAIL_USERNAME=EMAIL_ADD,
+#     MAIL_PASSWORD=APP_PASSWORD,
+#     MAIL_FROM="test@mailtrap.io",
+#     MAIL_PORT=2525,
+#     MAIL_SERVER="sandbox.smtp.mailtrap.io",
+#     MAIL_STARTTLS=True,
+#     MAIL_SSL_TLS=False,
+#     USE_CREDENTIALS = True,
+#     VALIDATE_CERTS = True,
+#     TEMPLATE_FOLDER = "templates"
+# )
 
 
 def decode_reset_password_token(token: str):

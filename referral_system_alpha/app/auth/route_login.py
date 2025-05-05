@@ -78,10 +78,6 @@ async def track_activity(user: User=Depends(get_current_user),db: Session = Depe
 
 def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_token"),access_token:str=Depends(oauth2_scheme),db:Session = Depends(get_db),user:User=Depends(get_current_user),image_path:str = Depends(get_current_image_path)):
      if user:
-        print("Hereeee",refresh_token)
-        print("Hereeee2",access_token)
-        print(get_exp_token(access_token))
-        print("Minutes remaining: ",(get_exp_token(access_token)-datetime.now()).total_seconds()//60)
         if refresh_token:
              my_user =  db.query(models.User).filter(models.User.username == user.username).first()
             #  user_last_active = my_user.last_active

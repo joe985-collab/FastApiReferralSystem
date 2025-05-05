@@ -44,6 +44,18 @@ conf = ConnectionConfig(
     VALIDATE_CERTS = True,
     TEMPLATE_FOLDER = "templates"
 )
+# conf = ConnectionConfig(
+#     MAIL_USERNAME=EMAIL_ADD,
+#     MAIL_PASSWORD=APP_PASSWORD,
+#     MAIL_FROM="test@mailtrap.io",
+#     MAIL_PORT=2525,
+#     MAIL_SERVER="sandbox.smtp.mailtrap.io",
+#     MAIL_STARTTLS=True,
+#     MAIL_SSL_TLS=False,
+#     USE_CREDENTIALS = True,
+#     VALIDATE_CERTS = True,
+#     TEMPLATE_FOLDER = "templates"
+# )
 
 def check_item_by_name_exists(db:Session, name:str,email:str):
     return db.query(User).filter(User.username == name).first() or db.query(User).filter(User.email == email).first()
@@ -95,8 +107,8 @@ async def send_mail(
         detail = f"The email address you entered appears to be invalid or doesn't exist. Please check for typos and try again, or use a different email address.")
 
 @router.get("/register")
-def register(request: Request):
-    return templates.TemplateResponse("auth/register.html",{"request":request})
+def register(request: Request,referral:str=""):
+    return templates.TemplateResponse("auth/register.html",{"request":request,"referral_code":referral})
 
 
 # @router.get("/activate-link/{activation_token}",response_class=HTMLResponse)
@@ -169,14 +181,12 @@ async def test_register(request:Request, db: Session = Depends(get_db)):
          new_ref_code = get_referral_code()
          new_user = UserCreate(username=test_username,email=test_email,password=hashed_password,referral_code=new_ref_code,referred_by=referrer.username)
          db_user = User(**new_user.model_dump())
-         print("db user id",db_user.id)
       
          db.add(db_user)
          db.commit()
          usr_id = db.query(User.id).filter(
              User.referral_code == new_ref_code
          ).first()
-         print("usr id",usr_id)
          referred_user = ReferralTable(referrer_id=referrer.id,referred_user_id=usr_id.id,status="active")
          db_ref = ReferralTableM(**referred_user.model_dump())
          db.add(db_ref)
@@ -208,7 +218,6 @@ async def register(request: Request, db: Session = Depends(get_db)):
             # print("New user",new_user)   
             await backend.create(session_id, new_user)
 
-            # await send_mail(eml=new_user.email,user=new_user,session_id=session_id) 
             # stored_data = await backend.read(session_id)
             # print("Cookie Stat",stored_data)
             if check_item_by_name_exists(db,form.username,form.email):
@@ -216,10 +225,15 @@ async def register(request: Request, db: Session = Depends(get_db)):
             if form.referral_code:
                 if not check_item_by_referral_code_exists(db,form.referral_code):
                     raise HTTPException(status_code=400,detail="Referral code not found")
-                new_user.referral_code = form.referral_code
-                new_user.referred_by = db.query(User.username).filter(
+                new_user.referral_code = get_referral_code()
+                referred_by,referrer_id = db.query(User.username,User.id).filter(
                     User.referral_code == form.referral_code
                 ).first()
+                new_user.referred_by = referred_by
+                new_user.referrer_id = referrer_id
+            else:
+                new_user.referral_code = get_referral_code()
+            await send_mail(eml=new_user.email,user=new_user,session_id=session_id) 
             response = templates.TemplateResponse("components/otp_verification.html",{"request":request,"register_form":form,"message":"An 4 digit OTP has been sent to your email. Kindly check and verify."})
             cookie.attach_to_response(response, session_id)
             return response
@@ -268,9 +282,22 @@ async def verify_password(request: Request,session_id:UUID = Depends(cookie),ses
             #     required_data = UserCreate(username=session_data.username,password=session_data.password,email=session_data.email,referral_code=session_data.referral_code,referred_by=session_data.referred_by)
             # else:
             #     required_data = UserCreate(username=session_data.username,password=session_data.password,email=session_data.email)
-            db_user = User(**session_data.model_dump(exclude={"otp","expires_at","password_plain"}))
-            image_meta = ImageMetadata(user_id=db_user.id,file_name="default_pic.png",file_path="static/images/default_pic.png",file_size_kb=20)
+            print(session_data)
+
+            db_user = User(**session_data.model_dump(exclude={"otp","expires_at","password_plain","referrer_id"}))
+
             db.add(db_user)
+            db.commit()
+
+            added_user =  db.query(User.id).filter(
+                    User.referral_code == session_data.referral_code
+                ).first()
+            image_meta = ImageMetadata(user_id=added_user.id,file_name="default_pic.png",file_path="static/images/default_pic.png",file_size_kb=20)
+
+            if db_user.referred_by:
+                referred_user = ReferralTable(referrer_id=session_data.referrer_id,referred_user_id=added_user.id,status="active")
+                db_ref = ReferralTableM(**referred_user.model_dump())
+                db.add(db_ref)
             db.add(image_meta)
             db.commit()
             db.refresh(db_user)

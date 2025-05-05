@@ -23,9 +23,9 @@ class ImageMetadata(Base):
 
      id = Column(Integer,primary_key=True,index=True)
      user_id = Column(Integer,unique=True,nullable=False)
-     file_name = Column(String(255),unique=True)
-     file_path = Column(String(255),unique=True)
-     file_size_kb = Column(String(255),unique=True)
+     file_name = Column(String(255))
+     file_path = Column(String(255))
+     file_size_kb = Column(String(255))
      created_date = Column(TIMESTAMP(timezone=True),server_default=func.now())
 
 class VerifyOTP(Base):
@@ -42,8 +42,8 @@ class ReferralTableM(Base):
      __tablename__ = "ReferralTable"
 
      id = Column(Integer,primary_key=True,index=True)
-     referrer_id = Column(Integer,unique=True,nullable=False)
-     referred_user_id = Column(Integer,nullable=False)
+     referrer_id = Column(Integer,nullable=False)
+     referred_user_id = Column(Integer,unique=True,nullable=False)
      date_referred = Column(TIMESTAMP(timezone=True),server_default=func.now())
      status = Column(String,nullable=True)
 

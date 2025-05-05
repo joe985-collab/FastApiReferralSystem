@@ -30,6 +30,7 @@ class TempUserData(BaseModel):
         otp: Optional[str] = None
         referral_code: Optional[str] = None
         referred_by: Optional[str] = None
+        referrer_id: Optional[str] = None
         is_verified: bool
         password_plain: str
         expires_at: Optional[datetime] = datetime.now() + timedelta(minutes=30)
