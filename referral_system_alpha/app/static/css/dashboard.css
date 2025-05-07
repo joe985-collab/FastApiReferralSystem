@@ -1,0 +1,412 @@
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+:root {
+	--c-gray-900: #000000;
+	--c-gray-800: #1f1f1f;
+	--c-gray-700: #2e2e2e;
+	--c-gray-600: #313131;
+	--c-gray-500: #969593;
+	--c-gray-400: #a6a6a6;
+	--c-gray-300: #bdbbb7;
+	--c-gray-200: #f1f1f1;
+	--c-gray-100: #ffffff;
+
+	--c-green-500: #45ffbc;
+	--c-olive-500: #e3ffa8;
+
+	--c-white: var(--c-gray-100);
+
+	--c-text-primary: var(--c-gray-100);
+	--c-text-secondary: var(--c-gray-200);
+	--c-text-tertiary: var(--c-gray-500);
+}
+
+
+body {
+	line-height: 1.5;
+	min-height: 100vh;
+	font-family: "Be Vietnam Pro", sans-serif;
+	background-color: var(--c-gray-900);
+	color: var(--c-text-primary);
+	display: flex;
+	padding-top: 3vw;
+	padding-bottom: 3vw;
+	justify-content: center;
+}
+  .thumbnail-container {
+    position: relative;
+    margin-bottom: 20px;
+    overflow: hidden; /* Keeps child elements (like caption) inside rounded borders */
+  }
+
+  /* Fix: Image fills container and respects rounded corners */
+  .thumbnail-img {
+    width: 140px;          /* Fixed width */
+    height: 140px;         /* Fixed height (must match width for a perfect circle) */
+    object-fit: cover;     /* Ensures the image covers the area without stretching */
+    border-radius: 50%;    /* Makes it circular */
+    cursor: pointer;
+  }
+  .copy-toast {
+    position: absolute;
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    z-index: 1000;
+    text-align: center;
+    width: max-content;
+    max-width: 200px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    animation: toast-fadeIn 0.3s ease-out;
+    transform-origin: top center;
+  }
+  
+  .copy-toast.hide {
+    animation: toast-fadeOut 0.3s ease-out forwards;
+  }
+  
+  @keyframes toast-fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  @keyframes toast-fadeOut {
+    to {
+      opacity: 0;
+      transform: translateY(-5px) scale(0.95);
+    }
+  }
+  .fa-copy:hover{
+    color: rgb(54, 54, 204);
+    cursor: pointer;
+  }
+  /* Fix: Caption width matches image */
+  .thumbnail-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: white;
+    padding: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    width: 140px; /* Ensures caption doesn't overflow */
+  }
+
+  header {
+    background-color: #2e86de;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .container {
+    display: flex;
+    padding: 2rem;
+  }
+
+  nav {
+    width: 250px;
+    background-color: #fff;
+    padding: 1rem;
+    margin-right: 2rem;
+    border-radius: 8px;
+  }
+
+  nav a {
+    display: block;
+    padding: 0.75rem;
+    color: #333;
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+  }
+
+  nav a:hover {
+    background-color: #e8f0fe;
+  }
+
+  .main {
+    flex: 1;
+  }
+
+  .card {
+    background-color: white;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    overflow: visible;
+  }
+
+  .card h2 {
+    margin-top: 0;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .product-card {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.05);
+    text-align: center;
+  }
+
+  .product-card h4 {
+    margin: 0.5rem 0;
+  }
+
+  .btn {
+    background-color: #2e86de;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    background-color: #1b4f72;
+  }
+  .thumbnail-img:hover {
+    transform: scale(1.03);
+  }
+
+  .thumbnail-container:hover .thumbnail-caption {
+    opacity: 1;
+  }
+ 
+
+  
+  /* Upload box visible state */
+  .upload-box.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+ 
+  .upload-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 600px;
+    height: 200px;
+    color: #777;
+    /* background: linear-gradient(45deg, rgba(255, 255, 255, 0.5),rgba(158, 181, 184, 0.5));
+     */
+    display: flex;
+    justify-content: center; /* horizontal centering */
+    align-items: center; 
+    background: white;
+    border-radius: 8px;
+    opacity: 0;
+    z-index: 10; /* Ensure it appears on top */
+    transform: translate(-50%, -50%) scale(1);
+    transition: all 0.5s ease;
+    /* Anti-glitch measures */
+    backface-visibility: hidden;
+    will-change: transform;
+    transform-style: preserve-3d;
+    transform: translate(-50%, -50%) scale(0);
+  }
+
+.upload-child{
+    border: 2px dashed #ccc;
+    width: 580px;
+    height: 180px;
+    display: grid;
+    place-items: center;
+}
+  
+.upload-box label {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    /* transition: background-color 0.3s ease; */
+}
+
+  .upload-box input[type="file"] {
+    display: none;
+}
+
+.upload-box label:hover {
+    background-color:  #0056b3;
+}
+
+#uploadButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#uploadButton[disabled=""] {
+    background-color: #777;
+}
+
+
+#uploadButton:not(#uploadButton[disabled=""]):hover {
+    background-color: #0056b3;
+}
+  .upload-box.active {
+    /* background-color: rgba(210, 90, 150, 0.4);
+     */
+     background-color: #bdbaba;
+  }
+  .confirmation-card {
+    max-width: 500px;
+    margin: 2rem auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+    border: none;
+  }
+  
+  .card-header {
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  
+  .card-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .card-subtitle {
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+    font-size: 1rem;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+    background: white;
+  }
+  
+  .cost-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .cost-label {
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  .cost-amount {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+  }
+  
+  .product-grid {
+    margin-bottom: 1.5rem;
+  }
+  
+  .product-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .product-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 1rem;
+  }
+  
+  .product-details {
+    flex-grow: 1;
+  }
+  
+  .product-name {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    color: #212529;
+  }
+  
+  .product-price {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .confirm-btn {
+    background: #4CAF50;
+    color: white;
+  }
+  
+  .confirm-btn:hover {
+    background: #3e8e41;
+    transform: translateY(-2px);
+  }
+  
+  .cancel-btn {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+  }
+  
+  .cancel-btn:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .confirmation-card {
+      margin: 1rem;
+      border-radius: 8px;
+    }
+    
+    .action-buttons {
+      flex-direction: column;
+    }
+  }

@@ -1,4 +1,4 @@
-from apis.route_login import login_for_access_token, get_current_user,get_current_image_path,oauth2_scheme
+from apis.route_login import login_for_access_token, get_current_user,get_current_ref_code,get_current_image_path,oauth2_scheme
 from database import get_db
 from fastapi import APIRouter,Cookie
 from fastapi import Depends
@@ -76,7 +76,7 @@ async def track_activity(user: User=Depends(get_current_user),db: Session = Depe
 
 
 
-def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_token"),access_token:str=Depends(oauth2_scheme),db:Session = Depends(get_db),user:User=Depends(get_current_user),image_path:str = Depends(get_current_image_path)):
+def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_token"),access_token:str=Depends(oauth2_scheme),db:Session = Depends(get_db),user:User=Depends(get_current_user),ref_code:str = Depends(get_current_ref_code),image_path:str = Depends(get_current_image_path)):
      if user:
         if refresh_token:
              my_user =  db.query(models.User).filter(models.User.username == user.username).first()
@@ -90,7 +90,7 @@ def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_to
                     new_refresh_token = create_access_token(
                         data = {"sub":my_user.email}, expires_delta=refresh_token_expires
                     )
-                    response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": user,"default_image":f"images/{image_path}", "today":datetime.today().strftime('%Y-%m-%d')})
+                    response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": user,"referral_code":ref_code.referral_code,"default_image":f"images/{image_path}", "today":datetime.today().strftime('%Y-%m-%d')})
                     response.set_cookie(
                         key="access_token", value=f"Bearer {new_access_token}", httponly=True
                     )
@@ -101,7 +101,7 @@ def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_to
        
 
 @router.get("/dashboard")
-async def dashboard(request: Request,current_user: User = Depends(get_current_user),image_path:str = Depends(get_current_image_path),_: str = Depends(track_activity),response:None = Depends(refresh_token)):
+async def dashboard(request: Request,current_user: User = Depends(get_current_user),ref_code:str = Depends(get_current_ref_code),_: str = Depends(track_activity),response:None = Depends(refresh_token),image_path:str = Depends(get_current_image_path)):
     try:
         if response:
             response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -114,7 +114,32 @@ async def dashboard(request: Request,current_user: User = Depends(get_current_us
                 detail="noauth",
                 headers = {"WWW-Authenticate": "Bearer"}
             )
-        response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user,"default_image":f"images/{image_path}", "today":datetime.today().strftime('%Y-%m-%d')})
+        response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": current_user,"referral_code":ref_code.referral_code,"default_image":f"images/{image_path}", "today":datetime.today().strftime('%Y-%m-%d')})
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        print("Current_ref_code",ref_code.referral_code)
+        return response
+    except HTTPException as e:
+            # return {"error":f"{e.detail}"}
+            return RedirectResponse(url="/login?err=noauth",status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/dashboard/confirmation")
+async def dashboard(request: Request,current_user: User = Depends(get_current_user),cost:str="",_: str = Depends(track_activity),response:None = Depends(refresh_token),image_path:str = Depends(get_current_image_path)):
+    try:
+        if response:
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+        if not current_user:
+             raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="noauth",
+                headers = {"WWW-Authenticate": "Bearer"}
+            )
+        response =  templates.TemplateResponse("components/confirmation.html",{"request": request,"cost":cost, "today":datetime.today().strftime('%Y-%m-%d')})
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
@@ -122,6 +147,7 @@ async def dashboard(request: Request,current_user: User = Depends(get_current_us
     except HTTPException as e:
             # return {"error":f"{e.detail}"}
             return RedirectResponse(url="/login?err=noauth",status_code=status.HTTP_303_SEE_OTHER)
+
 
 
 @router.get("/logout")

@@ -6,7 +6,7 @@ from apis.utils import OAuth2PwdBearer
 # from core.config import settings
 from utils import MyHasher
 # from core.security import create_access_token
-from apis.get_user_login import get_user,get_image_path
+from apis.get_user_login import get_user,get_image_path,get_ref_code
 from database import get_db
 from fastapi import APIRouter
 from fastapi import Depends
@@ -63,7 +63,19 @@ def get_current_image_path(token: str = Depends(oauth2_scheme),db:Session = Depe
      return get_image_path(user_id=user.id,db=db)
     else:
         return None
-
+    
+def get_current_ref_code(token: str = Depends(oauth2_scheme),db:Session = Depends(get_db)):
+       
+    if not token:
+        return None
+    
+    email = decode_token(token)
+    user = get_user(email=email,db=db)
+    if user:
+     return get_ref_code(user_id=user.id,db=db)
+    else:
+        return None
+    
 @router.post("/token",response_model=Token)
 def login_for_access_token(
     response: Response,
