@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer,String, Boolean,DateTime
+from sqlalchemy import Column, Integer,String, Boolean,DateTime,Numeric
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from database import Base
 from sqlalchemy.sql import func
@@ -47,4 +47,25 @@ class ReferralTableM(Base):
      date_referred = Column(TIMESTAMP(timezone=True),server_default=func.now())
      status = Column(String,nullable=True)
 
+class Transactions(Base):
+     
+     __tablename__ = "Transactions"
+
+     id = Column(Integer,primary_key=True,index=True)
+     user_id = Column(Integer,nullable=False)
+     amount = Column(Numeric)
+     status  = Column(String(10),nullable=False)
+     created_at = Column(TIMESTAMP(timezone=True),server_default=func.now()) 
+
+class PointsLedger(Base):
+     
+     __tablename__ = "PointsLedger"
+
+     id = Column(Integer,primary_key=True,index=True)
+     user_id = Column(Integer,nullable=False)
+     points = Column(Integer)
+     type = Column(String(10),nullable=False)
+     expires_at = Column(TIMESTAMP(timezone=True),nullable=False)
+     reference_id = Column(Integer)
+     created_at = Column(TIMESTAMP(timezone=True),server_default=func.now()) 
 

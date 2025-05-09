@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
       evt.preventDefault()
       fileButton.files = evt.dataTransfer.files
       uploadBox.classList.remove('active');
+      para.innerText = fileButton.files[0].name;
       uploadButton.disabled = false;
     }
     myLabel.addEventListener('click', (e) => {

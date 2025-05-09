@@ -2,6 +2,7 @@ from pydantic import BaseModel,EmailStr,ConfigDict
 # from sqlalchemy import Boolean
 from datetime import datetime
 from typing import Optional
+from decimal import Decimal
 
 class UserCreate(BaseModel):
 
@@ -39,6 +40,21 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class Points(BaseModel):
+
+    user_id:int
+    points: int
+    type: str
+    expires_at: datetime
+    reference_id: Optional[int] = None
+    created_at: datetime
+
+class Transaction(BaseModel):
+
+    user_id: int
+    amount: Decimal
+    status: str
+    created_at: Optional[datetime] = datetime.now()
 
 class ForgetPasswordRequest(BaseModel):
     email: str

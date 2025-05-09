@@ -6,35 +6,38 @@
 
 {% block content %}
 <div class="confirmation-card">
-    <div class="card-header">
-      <h2 class="card-title">Confirm Your Purchase</h2>
-      <p class="card-subtitle">Are you sure you want to continue?</p>
-    </div>
-    
-    <div class="card-body">
-      <div class="product-summary">
-        <div class="cost-display">
-          <span class="cost-label">Total Cost:</span>
-          <span class="cost-amount">{{cost}}</span>
-        </div>
-        
-        <div class="product-grid">
-          <!-- Product items would go here -->
-          <!-- Example product item: -->
-          <div class="product-item">
-            <img src="product-image.jpg" alt="Product" class="product-image">
-            <div class="product-details">
-              <h4 class="product-name">Product Name</h4>
-              <p class="product-price">{{cost}}</p>
+    <form action="/confirm-transaction" method="post">
+      <div class="card-header">
+        <h2 class="card-title">Confirm Your Purchase</h2>
+        <p class="card-subtitle">Are you sure you want to continue?</p>
+      </div>
+      
+      <div class="card-body">
+        <div class="product-summary">
+          <div class="cost-display">
+            <span class="cost-label">Total Cost:</span>
+            <span class="cost-amount">{{cost}}</span>
+          </div>
+          
+          <div class="product-grid">
+            <!-- Product items would go here -->
+            <!-- Example product item: -->
+            <div class="product-item">
+              <img src="product-image.jpg" alt="Product" class="product-image">
+              <div class="product-details">
+                <h4 class="product-name">Product Name</h4>
+                <p class="product-price">{{cost}}</p>
+              </div>
             </div>
           </div>
         </div>
+        
+        <div class="action-buttons">
+          <input type="hidden" name="cost_tag" value={{cost}}>
+          <button type="submit" class="btn confirm-btn">Yes, Continue</button>
+          <a href="/dashboard" class="btn cancel-btn">No, Cancel</a>
+        </div>
       </div>
-      
-      <div class="action-buttons">
-        <button class="btn confirm-btn">Yes, Continue</button>
-        <button class="btn cancel-btn">No, Cancel</button>
-      </div>
-    </div>
+    </form>
   </div>
 {% endblock %}

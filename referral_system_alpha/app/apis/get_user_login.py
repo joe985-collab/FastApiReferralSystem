@@ -1,4 +1,4 @@
-from models import User,ImageMetadata
+from models import User,ImageMetadata,PointsLedger
 from sqlalchemy.orm import Session
 
 def get_user(email: str,db: Session):
@@ -16,3 +16,9 @@ def get_ref_code(user_id:int,db: Session):
     referral = db.query(User.referral_code).filter(User.id == user_id).first()
 
     return referral
+
+def get_user_points(user_id:int,db:Session):
+
+
+    points = db.query(PointsLedger.points).filter(PointsLedger.user_id == user_id).first()
+    return points.points if points else 0
