@@ -34,7 +34,7 @@ def start_application():
 
         app = FastAPI()
         # app.add_middleware(SessionMiddleware, secret_key=SESSION_KEY,session_cookie="session_cookie",max_age=1800)
-        create_tables()
+        # create_tables()
         configure_static(app)
         include_router(app)
         return app

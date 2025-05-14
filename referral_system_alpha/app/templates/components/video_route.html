@@ -1,0 +1,36 @@
+{% extends "shared/dashboard.html" %}
+
+{% block title %}
+  <title>Upload Video</title>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-5 d-flex justify-content-center align-items-center">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h3 class="text-center">Upload Your Video</h3>
+        </div>
+        <div class="card-body">
+          <form action="/video-upload" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="file" class="form-label">Select Video File</label>
+              <input
+                type="file"
+                name="video_file"
+                id="file"
+                class="form-control"
+                accept="video/*"
+                required
+              />
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success">Upload Video</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

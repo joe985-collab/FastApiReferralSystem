@@ -11,7 +11,7 @@ from auth.forms import LoginForm
 from fastapi.responses import RedirectResponse
 from datetime import datetime
 from sqlalchemy.orm import Session
-from models import User,ImageMetadata,Transactions,PointsLedger
+from models import User,ImageMetadata,Transactions,PointsLedger,TempVideo
 from schemas import Points,Transaction
 from database import get_db
 from decimal import Decimal
@@ -62,7 +62,7 @@ def uploadImage(request:Request,file:UploadFile = File(...),current_user: User=D
                  return {"error":f"{e.detail}"}
 
 @router.post("/confirm-transaction")
-async def confirm_transaction(request:Request,current_user: User=Depends(get_current_user_id),db=Depends(get_db)):
+async def confirm_transaction(request:Request,current_user: User = Depends(get_current_user_id),db=Depends(get_db)):
      
      try:
         if not current_user:
@@ -88,3 +88,48 @@ async def confirm_transaction(request:Request,current_user: User=Depends(get_cur
 
             else:
                  return {"error":f"{e.detail}"}
+
+@router.get("/dashboard/video-upload")
+async def uploaded_video(request:Request ,current_user: User = Depends(get_current_user)):
+        if not current_user:
+             return None
+        return templates.TemplateResponse("components/video_route.html",{"request":request,"user":current_user})
+
+@router.get("/dashboard/videos")
+async def get_videos(request:Request ,current_user: User = Depends(get_current_user_id),db:Session = Depends(get_db)):
+        if not current_user:
+             return None
+        video = db.query(TempVideo).filter(TempVideo.user_id == current_user.id).first()
+        if not video:
+            return RedirectResponse(url="/dashboard",status_code=status.HTTP_303_SEE_OTHER)
+        else:
+            return templates.TemplateResponse("components/analyze_video.html",{"request":request,"user":current_user,"default_video":f"videos/{video.filename}"})
+        
+@router.post("/video-upload")
+def uploaded_video(video_file: UploadFile = File(...),current_user: User = Depends(get_current_user),db:Session = Depends(get_db)):
+     if not current_user:
+          return None
+     contents = video_file.file.read()
+
+     file_path = f"static/videos/{video_file.filename}"
+
+     with open(file_path,"wb") as f:
+          f.write(contents)
+
+     user = db.query(User).filter(User.username == current_user.username).first()
+     filename = video_file.filename
+     file_size_kb = os.stat(file_path).st_size/1024
+
+     new_video = db.query(TempVideo).filter(TempVideo.user_id == user.id).first()
+     if not new_video:
+            new_video = TempVideo(user_id=user.id,filename=filename,file_path=file_path,file_size_kb=file_size_kb)
+            db.add(new_video)
+     else:  
+            new_video.filename = filename
+            new_video.file_path = file_path
+            new_video.file_size_kb = file_size_kb
+     db.commit()
+     db.refresh(new_video)
+     db.close()
+     video_file.file.close()
+     return RedirectResponse(url="/dashboard/videos",status_code=status.HTTP_303_SEE_OTHER)

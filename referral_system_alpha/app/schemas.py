@@ -81,5 +81,13 @@ class EmailTemplateSchema(BaseModel):
     link_expiry_min: str
     reset_link: str
 
+class TempVideoSchema(BaseModel):
+
+    user_id: int
+    filename: str
+    file_path: str
+    file_size_kb: str
+    created_at: Optional[datetime] = datetime.now()
+
 class User(BaseModel):
     username: str

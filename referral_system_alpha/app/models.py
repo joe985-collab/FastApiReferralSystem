@@ -69,3 +69,14 @@ class PointsLedger(Base):
      reference_id = Column(Integer)
      created_at = Column(TIMESTAMP(timezone=True),server_default=func.now()) 
 
+
+class TempVideo(Base):
+     
+     __tablename__ = "TempVideo"
+
+     id = Column(Integer,primary_key=True,index=True)
+     user_id = Column(Integer,nullable=False)
+     filename = Column(String(255),nullable=False)
+     file_path = Column(String(512),nullable=False)
+     file_size_kb = Column(String,nullable=False)
+     created_at = Column(TIMESTAMP(timezone=True),server_default=func.now())

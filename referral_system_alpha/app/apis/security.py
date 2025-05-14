@@ -35,13 +35,11 @@ def get_exp_token(token:str):
          return datetime.fromtimestamp(payload.get("exp"))
       except JWTError as e:
          print("error",e)
-         return None
       
 def decode_token(token: str):
       try:
          payload = jwt.decode(token,SECRET_KEY,ALGORITHM)
-         email: str = payload.get("sub")
-         return email
+         id: str = payload.get("sub")
+         return id
       except JWTError as e:
          print("error",e)
-         return None
