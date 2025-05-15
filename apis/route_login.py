@@ -39,15 +39,12 @@ def authenticate_user(email:str,password:str,db:Session = Depends(get_db)):
 
 def get_current_user(token: str = Depends(oauth2_scheme),db:Session = Depends(get_db)):
     
-<<<<<<< HEAD
     print("Hereeeeeeeeeeee")
     if token:
         id = decode_token(token)
         print("ID",id)
-=======
     if token:
         id = decode_token(token)
->>>>>>> fdfa1b0c8b410a16906486f74f7b1088fa46a2ea
         user = get_user_id(id=id,db=db)
         if user:
             return User(username=user.username)
