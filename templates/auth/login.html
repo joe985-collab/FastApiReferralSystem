@@ -1,0 +1,54 @@
+{% extends "shared/base.html" %}
+
+
+{% block title %}
+  <title>Login</title>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="text-danger font-weight-bold">
+        {% for error in errors %}
+          <li>{{error}}</li>
+        {% endfor %}
+    </div>
+    <div class="text-success font-weight-bold">
+      {% if msg %}
+      <div class="badge bg-success text-wrap font-weight-bold" style="font-size: large;">
+        {{msg}}
+      </div>
+      {% endif %}
+  </div>
+  </div>
+  <div class="form-wrapper">
+      <div class="form-structor">
+        <div class="signup slide-up">
+          <h2 class="form-title" id="signup"><span>or</span>Sign up</h2>
+          <form method="POST">
+              <div class="form-holder">
+                <input type="text" required placeholder="Your username" name="username" value="{{username}}" class="input">
+                <input type="text" required placeholder="Your email" name="email" value="{{email}}" class="input">
+                <input type="text" placeholder="Input Referral Code" value="{{referral_code}}" name="referral_code" class="input">
+                <input type="password" required placeholder="Choose a secure password" value="{{password}}" name="password" class="input">
+              </div>
+              <button type="submit" class="submit-btn">Register</button>
+          </form>
+        </div>
+
+        <div class="login">
+          <div class="center">
+            <h2 class="form-title" id="login"><span>or</span>Log in</h2>
+            <form method="POST">
+              <div class="form-holder">
+                <input type="text" required placeholder="Your email" name="email" value="{{email}}" class="input">
+                <input type="password" required placeholder="Your password" value="{{password}}" name="password" class="input">
+              </div>
+              <button type="submit" class="submit-btn">Log in</button>
+              <a href="/forget-password" class="forgot-password">Forgot password?</a>
+            </form>
+          </div>
+        </div>
+      </div>
+  </div>
+{% endblock %}
