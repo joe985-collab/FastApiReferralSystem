@@ -12,84 +12,89 @@
 
 </head>
 <body>
-
-    {% block content %}
-    <header>
-        <h1>Welcome, {{user.username}}</h1>
+      {%block header%}
+      <header>
+         <h1>Welcome, {{user.username}}</h1>
       </header>
+      {% endblock %}
     
-      <div class="container">
-        <nav>
-          <div class="row justify-content-center">  <!-- Added justify-content-center here -->
-            <div class="text-center">  <!-- Added text-center wrapper -->
-              <!-- Thumbnail 1 -->
-              <div class="col-md-8 col-sm-6 thumbnail-container mx-auto">  <!-- Added mx-auto -->
-                {% set dynamic_var = default_image %}
-                <img src="{{ url_for('static', path=dynamic_var) }}" alt="Sample Image 1" class="thumbnail-img d-block mx-auto">  <!-- Added d-block mx-auto -->
-                <div class="thumbnail-caption rounded-bottom" style="font-size: 0.5rem;">
-                  <h5>{{user.username}}</h5>
-                  <p class="mb-0">{{today}}</p>
+        <div class="container">
+          <nav>
+            <div class="row justify-content-center">  <!-- Added justify-content-center here -->
+              <div class="text-center">  <!-- Added text-center wrapper -->
+                <!-- Thumbnail 1 -->
+                 {% block thumbnail%}
+                    <div class="col-md-8 col-sm-6 thumbnail-container mx-auto">  <!-- Added mx-auto -->
+                      {% set dynamic_var = default_image %}
+                      <img src="{{ url_for('static', path=dynamic_var) }}" alt="Sample Image 1" class="thumbnail-img d-block mx-auto">  <!-- Added d-block mx-auto -->
+                      <div class="thumbnail-caption rounded-bottom" style="font-size: 0.5rem;">
+                            <h6 class="mb-1">{{user.username}}</h6>
+                            <p>{{today}}</p>
+                      </div>
+                    </div> 
+                  {% endblock %}
+                <div class="d-flex flex-column align-items-center mt-3">  <!-- Added flex container for links -->
+                  <a href="/dashboard" class="mb-2">Dashboard</a>
+                  <a href="#" class="mb-2">My Purchases</a>
+                  <a href="#" class="mb-2">Referral Rewards</a>
+                  <a href="#" class="mb-2">Account Settings</a>
+                  <a href="/dashboard/video-upload" class="mb-2">Upload Video</a>   
+                  <a href="/dashboard/videos" class="mb-2">Videos</a>       
+                  <a href="/logout" class="mb-2">Logout</a>
                 </div>
-              </div> 
-              <div class="d-flex flex-column align-items-center mt-3">  <!-- Added flex container for links -->
-                <a href="#" class="mb-2">Dashboard</a>
-                <a href="#" class="mb-2">My Purchases</a>
-                <a href="#" class="mb-2">Referral Rewards</a>
-                <a href="#" class="mb-2">Account Settings</a>
-                <a href="dashboard/video-upload" class="mb-2">Upload Video</a>   
-                <a href="dashboard/videos" class="mb-2">Videos</a>       
-                <a href="/logout" class="mb-2">Logout</a>
               </div>
             </div>
-          </div>
-        </nav>
-        <div class="main">
-          <div class="card">
-            <h2>Referral Rewards</h2>
-            <p>You registered using a referral code! 🎉</p>
-            <p><strong>Reward Points:</strong> {{points}} </p>
-            <p><strong>Discount Available:</strong> 20%</p>
-            <p><strong>Referral Code:</strong> <a id="ref_code_a" href="/register?referral={{referral_code}}">{{referral_code}}</a>   <i class="fa-regular fa-copy"></i></p>
-            <button class="btn">Redeem Now</button>
-           <div class="upload-box" id="uploadBox">
-              <div class="upload-child">
-                <form action="/upload_image" method="post" enctype="multipart/form-data">
-                  <div>
-                    <p>Drag and drop your image here.</p>
-                  </div>
-                  <div class="uploadContainer">
-                    <p id="upload-text">No file selected.</p>
-                    <input type="file" name="file" id="fileInput">
-                    <label for="fileInput">Choose File</label>
-                    <button id="uploadButton">Submit</button>
-                  </div>
-                </form>
-              </div>    
-           </div>
-          </div>
-          <div class="card">
-            <h2>Available Products & Services</h2>
-            <div class="product-grid">
-              <!-- Repeat product-card for each item -->
-              <div class="product-card">
-                <h4>Product 1</h4>
-                <p>$50.00</p>
-                <a class="btn btn-primary" href="/dashboard/confirmation?cost=50.00">Buy Now</a>
+          </nav>
+
+          {% block content %}
+
+          <div class="main">
+            <div class="card">
+              <h2>Referral Rewards</h2>
+              <p>You registered using a referral code! 🎉</p>
+              <p><strong>Reward Points:</strong> {{points}} </p>
+              <p><strong>Discount Available:</strong> 20%</p>
+              <p><strong>Referral Code:</strong> <a id="ref_code_a" href="/register?referral={{referral_code}}">{{referral_code}}</a>   <i class="fa-regular fa-copy"></i></p>
+              <button class="btn">Redeem Now</button>
+            <div class="upload-box" id="uploadBox">
+                <div class="upload-child">
+                  <form action="/upload_image" method="post" enctype="multipart/form-data">
+                    <div>
+                      <p>Drag and drop your image here.</p>
+                    </div>
+                    <div class="uploadContainer">
+                      <p id="upload-text">No file selected.</p>
+                      <input type="file" name="file" id="fileInput">
+                      <label for="fileInput">Choose File</label>
+                      <button id="uploadButton">Submit</button>
+                    </div>
+                  </form>
+                </div>    
+            </div>
+            </div>
+            <div class="card">
+              <h2>Available Products & Services</h2>
+              <div class="product-grid">
+                <!-- Repeat product-card for each item -->
+                <div class="product-card">
+                  <h4>Product 1</h4>
+                  <p>$50.00</p>
+                  <a class="btn btn-primary" href="/dashboard/confirmation?cost=50.00">Buy Now</a>
+                </div>
+                <div class="product-card">
+                  <h4>Service A</h4>
+                  <p>$10.00</p>
+                  <a class="btn btn-primary" href="/dashboard/confirmation?cost=10.00">Buy Now</a>
+                </div>
+                <!-- ... -->
               </div>
-              <div class="product-card">
-                <h4>Service A</h4>
-                <p>$10.00</p>
-                <a class="btn btn-primary" href="/dashboard/confirmation?cost=10.00">Buy Now</a>
-              </div>
-              <!-- ... -->
             </div>
           </div>
         </div>
-      </div>
-      <script src="{{ url_for('static', path='js/dashboard_script.js') }}"></script>
-    
+        <script src="{{ url_for('static', path='js/dashboard_script.js') }}"></script>
+      {% endblock %}
+
     </body>
-    {% endblock %}
 
 
 </html>

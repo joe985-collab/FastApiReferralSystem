@@ -1,0 +1,101 @@
+{% extends "shared/dashboard.html" %}
+
+{% block title %}
+    <title>Video Summary</title>
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block thumbnail%}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2>Video</h2>
+            <div class="embed-responsive embed-responsive-16by9">
+                <video class="embed-responsive-item" controls>
+                    <source src="{{ video_path }}" type="video/mp4">
+                    Your browser does not support HTML5 video.
+                </video>
+            </div>
+        </div>
+        <div class="col-12">
+            <h2>Summary</h2>
+            <div class="card"
+                <div class="card-body" id="summary-container" style="overflow-y: auto; max-height: 300px; position: relative;">
+                    <p id="summary-content">{{ video_summary[:900] }}</p>
+                    <div id="loading-indicator" class="text-center py-2" style="position: absolute; bottom: 0; left: 0; width: 100%; background-color: #f8f9fa; display: none;">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOMContentLoaded fired"); // Check if this event is firing
+    const summaryContainer = document.getElementById('summary-container');
+    const summaryContent = document.getElementById('summary-content');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const fullSummary = {{ video_summary|tojson }};
+    let wordsShown = 900;
+    const wordsPerLoad = 165;
+    let isLoading = false;
+    let maxScrollHeight = fullSummary.length/3;
+    let currentScroll = 0;
+    console.log("fullSummary:", fullSummary); // Check the value of fullSummary
+    console.log("summaryContainer:", summaryContainer);  //check
+    console.log("summaryContent:", summaryContent);    //check
+    function addMoreContent() {
+        console.log("addMoreContent called"); // Check if this function is called
+        if (isLoading) {
+            console.log("isLoading is true, returning");
+            return;
+        }
+
+        const containerHeight = summaryContainer.clientHeight;
+        const scrollHeight = summaryContainer.scrollHeight;
+        const scrollTop = summaryContainer.scrollTop;
+        console.log("Container Height:", containerHeight);
+        console.log("Scroll Height:", scrollHeight);
+        console.log("Scroll Top:", scrollTop);
+
+        if (currentScroll >= maxScrollHeight) {
+            return;
+        }
+        if (scrollHeight - scrollTop <= containerHeight + 50) { 
+            isLoading = true;
+            currentScroll += scrollTop;
+
+            loadingIndicator.style.display = 'block';
+            console.log("Loading more content...");
+            setTimeout(() => {
+                const summaryPortion = fullSummary.substring(wordsShown, wordsShown + wordsPerLoad);
+                if (summaryPortion) {
+                    summaryContent.textContent += summaryPortion;
+                    wordsShown += wordsPerLoad;
+                }
+                isLoading = false;
+                loadingIndicator.style.display = 'none';
+                console.log("Finished loading");
+            }, 500);
+        }
+    }
+
+    if (fullSummary.length > wordsShown) {
+        console.log("Adding scroll event listener");
+        console.log(fullSummary.length);
+        summaryContainer.addEventListener('scroll', addMoreContent);
+    } else {
+        loadingIndicator.style.display = 'none';
+        console.log("Hiding loading indicator - no more content");
+    }
+});
+</script>
+{% endblock %}

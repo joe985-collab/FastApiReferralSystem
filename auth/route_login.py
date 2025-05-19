@@ -85,18 +85,12 @@ def refresh_token(request:Request,refresh_token = Cookie(None, alias="refresh_to
                     access_token_expires = datetime.now(timezone.utc)+timedelta(minutes=30)
                     refresh_token_expires = datetime.now(timezone.utc)+timedelta(days=7)
                     new_access_token = create_access_token(
-<<<<<<< HEAD
                         data = {"sub":my_user.id}, expires_delta=access_token_expires
                     )
                     new_refresh_token = create_access_token(
-                        data = {"sub":my_user.id}, expires_delta=refresh_token_expires
-=======
-                        data = {"sub":my_user.email}, expires_delta=access_token_expires
+                        data = {"sub":my_user.id}, expires_delta=refresh_token_expires,
                     )
-                    new_refresh_token = create_access_token(
-                        data = {"sub":my_user.email}, expires_delta=refresh_token_expires
->>>>>>> fdfa1b0c8b410a16906486f74f7b1088fa46a2ea
-                    )
+                
                     response =  templates.TemplateResponse("components/dashboard.html",{"request": request,"user": user,"referral_code":ref_code.referral_code,"default_image":f"images/{image_path}", "today":datetime.today().strftime('%Y-%m-%d')})
                     response.set_cookie(
                         key="access_token", value=f"Bearer {new_access_token}", httponly=True

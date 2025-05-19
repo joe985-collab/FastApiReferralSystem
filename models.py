@@ -79,7 +79,6 @@ class TempVideo(Base):
      filename = Column(String(255),nullable=False)
      file_path = Column(String(512),nullable=False)
      file_size_kb = Column(String,nullable=False)
-<<<<<<< HEAD
      created_at = Column(TIMESTAMP(timezone=True),server_default=func.now())
 
 class VideoSummary(Base):
@@ -90,6 +89,5 @@ class VideoSummary(Base):
      user_id = Column(Integer,nullable=False)
      video_id = Column(Integer,nullable=False)
      video_summary = Column(String)
-=======
->>>>>>> fdfa1b0c8b410a16906486f74f7b1088fa46a2ea
+     video_path = Column(String(255))
      created_at = Column(TIMESTAMP(timezone=True),server_default=func.now())

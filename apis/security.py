@@ -38,11 +38,7 @@ def get_exp_token(token:str):
 def decode_token(token: str):
       try:
          payload = jwt.decode(token,SECRET_KEY,ALGORITHM)
-<<<<<<< HEAD
          id: int = payload.get("sub")
-=======
-         id: str = payload.get("sub")
->>>>>>> fdfa1b0c8b410a16906486f74f7b1088fa46a2ea
          return id
       except JWTError as e:
          print("error",e)

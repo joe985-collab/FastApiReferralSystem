@@ -1,10 +1,7 @@
 from apis.route_login import get_current_user,get_current_user_id, get_current_ref_code,get_current_user_points,get_current_image_path
 from database import get_db
-<<<<<<< HEAD
 from fastapi import APIRouter,Form
-=======
 from fastapi import APIRouter
->>>>>>> fdfa1b0c8b410a16906486f74f7b1088fa46a2ea
 from fastapi import Depends
 from fastapi import HTTPException,File,UploadFile
 from fastapi import Request,Response
@@ -15,18 +12,16 @@ from auth.forms import LoginForm
 from fastapi.responses import RedirectResponse
 from datetime import datetime
 from sqlalchemy.orm import Session
-<<<<<<< HEAD
 from models import User,ImageMetadata,Transactions,PointsLedger,TempVideo,VideoSummary
 from schemas import Points,Transaction
 from database import get_db
 from decimal import Decimal 
 from dashboard.ai_stuff.video_summary import VideoSummarizer
-=======
 from models import User,ImageMetadata,Transactions,PointsLedger,TempVideo
 from schemas import Points,Transaction
 from database import get_db
+from faster_whisper import WhisperModel
 from decimal import Decimal
->>>>>>> fdfa1b0c8b410a16906486f74f7b1088fa46a2ea
 import os
 # Learn about webauthn library, fido and passkeys
 os.chdir(os.getcwd())
@@ -112,19 +107,12 @@ async def get_videos(request:Request ,current_user: User = Depends(get_current_u
         if not current_user:
              return None
         video = db.query(TempVideo).filter(TempVideo.user_id == current_user.id).first()
-<<<<<<< HEAD
         # if not video:
         #     return RedirectResponse(url="/dashboard",status_code=status.HTTP_303_SEE_OTHER)
         # else:
         default_video = f"videos/{video.filename}" if video else None
         return templates.TemplateResponse("components/analyze_video.html",{"request":request,"user":current_user,"default_video":default_video})
-=======
-        if not video:
-            return RedirectResponse(url="/dashboard",status_code=status.HTTP_303_SEE_OTHER)
-        else:
-            return templates.TemplateResponse("components/analyze_video.html",{"request":request,"user":current_user,"default_video":f"videos/{video.filename}"})
->>>>>>> fdfa1b0c8b410a16906486f74f7b1088fa46a2ea
-        
+      
 @router.post("/video-upload")
 def uploaded_video(video_file: UploadFile = File(...),current_user: User = Depends(get_current_user),db:Session = Depends(get_db)):
      if not current_user:
@@ -153,8 +141,17 @@ def uploaded_video(video_file: UploadFile = File(...),current_user: User = Depen
      db.close()
      video_file.file.close()
      return RedirectResponse(url="/dashboard/videos",status_code=status.HTTP_303_SEE_OTHER)
-<<<<<<< HEAD
 
+@router.get("/dashboard/summary_{video_id}/{user_id}")
+async def get_summary(request:Request,video_id:int,user_id:int,current_user: User = Depends(get_current_user_id),db:Session = Depends(get_db)):
+     if not current_user:
+          return None
+     video_s = db.query(VideoSummary).filter(VideoSummary.user_id == user_id).filter(VideoSummary.video_id == video_id).first()
+     if not video_s:
+          return RedirectResponse(url="/dashboard",status_code=status.HTTP_303_SEE_OTHER)
+     else:
+          return templates.TemplateResponse("components/video_summary.html",{"request":request,"user":current_user,"video_summary":video_s.video_summary,"video_path":video_s.video_path})
+     
 @router.post("/analyze-video")
 async def analyze_video(request:Request,analyze_video:str  = Form(...),prompt:str = Form(...),current_user:User = Depends(get_current_user),db:Session = Depends(get_db)):
      
@@ -163,18 +160,19 @@ async def analyze_video(request:Request,analyze_video:str  = Form(...),prompt:st
     
   
      video_path  = f"static/{analyze_video}"
-     
-     video_summarizer = VideoSummarizer(video_path=video_path,model="llama3.2:1b",prompt=prompt)
 
+     model = "llama3.2:1b"
+
+     video_summarizer = VideoSummarizer(video_path=video_path,model=model,prompt=prompt)
+     video_summarizer.analyze_video()
      try:
-            current_summary,time_in_sec = video_summarizer.analyze_video()
-            current_video = db.query(TempVideo).filter(TempVideo.file_path == video_path).first()
-            new_summary = VideoSummary(user_id=current_video.user_id,video_id=current_video.id,video_summary=current_summary)
-            db.add(new_summary)
-            db.commit()
-            return {"elapsed_time":time_in_sec,"status":"success"}
+         current_summary,time_in_sec = video_summarizer.analyze_video()
+     #     current_video = db.query(TempVideo).filter(TempVideo.file_path == video_path).first()
+     #     new_summary = VideoSummary(user_id=current_video.user_id,video_id=current_video.id,video_summary=current_summary)
+#   db.add(new_summary)
+#   db.commit()
+         print("Summary",current_summary)
+         return {"elapsed_time":time_in_sec,"status":"success"}
      except Exception as e:
           raise HTTPException(status_code=500, detail=f'Something went wrong {e}')
 
-=======
->>>>>>> fdfa1b0c8b410a16906486f74f7b1088fa46a2ea
