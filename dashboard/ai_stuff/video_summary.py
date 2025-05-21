@@ -1,7 +1,7 @@
 from moviepy import VideoFileClip
 import ollama
 from faster_whisper import WhisperModel
-import os
+from fastapi import WebSocket
 import time
 from pydub import AudioSegment
 
@@ -46,24 +46,17 @@ class VideoSummarizer():
 
     def transcribe_video(self,audio_path):
 
-        model = WhisperModel("base",device="cpu",compute_type="int8",cpu_threads=4)
+        model = WhisperModel("tiny.en",device="cpu",compute_type="int8",cpu_threads=4)
         segments,_ = model.transcribe(audio_path,beam_size=3,chunk_length=20,without_timestamps=True,no_speech_threshold=0.4)
 
         return " ".join([segment.text for segment in segments])
 
-    def convert_to_16k(self,input_path,output_path):
-
-        audio = AudioSegment.from_file(input_path)
-        audio = audio.set_frame(16000)
-        audio = audio.set_channels(1)
-        audio.export(output_path, format="wav", parameters=["-ac", "1", "-ar", "16000"])
-    
+   
     def extract_audio(self):
 
         video = VideoFileClip(self.video_path)
         audio_path = self.video_path.replace("static/videos/", "static/audio/").replace(".mp4", ".wav")
         video.audio.write_audiofile(audio_path, codec="pcm_s16le")
-        replaced_path = audio_path.replace(".","_16k.")
         audio = AudioSegment.from_file(audio_path,format="wav")
         audio = audio.set_frame_rate(16000)
         audio = audio.set_channels(1)
@@ -81,18 +74,26 @@ class VideoSummarizer():
         ])
         return response["message"]["content"]
 
-    def analyze_video(self):
+    async def analyze_video(self,websocket:WebSocket):
 
         try:
-
+            await websocket.send_text("Task started")
             audio_path = self.extract_audio()
+            await websocket.send_text("progress: 33")
             transcript = self.transcribe_video(audio_path)
+            await websocket.send_text("progress: 34")
             summary = self.generate_summary(transcript)
+            await websocket.send_text("progress: 33")
+
+            time.sleep(1)
             total_time_elapsed = time.time() - self.start_time
 
-
-            return summary,total_time_elapsed
+            await websocket.send_json({"status":"completed","summary":summary,"time_elapsed_sec":total_time_elapsed})
+            # return summary,total_time_elapsed
         
         except Exception as e:
 
             return f"{e}"
+        finally:
+
+            await websocket.close()

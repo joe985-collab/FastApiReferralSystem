@@ -11,35 +11,61 @@
 
 {% block thumbnail%}
 {% endblock %}
-
+{%block style%}
+  <style>
+     .progress-container {
+            width:60px; /* Set your desired width for the progress bar */
+            height:60px; /* Set your desired height for the progress bar */
+            margin: 6px;
+            position: relative; /* Add this */
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1em; /* Adjust font size as needed */
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+{%endblock%}
 {% block content %}
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 {% if default_video %}
-                    <form action="/analyze-video" method="post">
-                        <div class="card shadow-lg">
-                            <div class="card-header bg-dark text-white text-center py-3">
-                                <h3>Video Analysis</h3>
+                    <div class="card shadow-lg" style="position: relative;">
+                        <div class="card-header bg-dark text-white text-center py-3">
+                            <h3>Video Analysis</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <video id="analyzedVideo" width="100%" controls>
+                                    <source src="{{ url_for('static', path=default_video) }}" type="video/mp4">
+                                    <input id="analyze_video" type="hidden" name="analyze_video" value="{{ default_video }}">
+                                    Your browser does not support the video tag.
+                                </video>
                             </div>
-                            <div class="card-body">
-                                <div class="mb-4">
-                                    <video id="analyzedVideo" width="100%" controls>
-                                        <source src="{{ url_for('static', path=default_video) }}" type="video/mp4">
-                                        <input type="hidden" name="analyze_video" value="{{ default_video }}">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="prompt" class="form-label">Analysis Prompt</label>
-                                    <textarea id="prompt" name="prompt" rows="4" class="form-control" placeholder="Enter your analysis prompt here..."></textarea>
-                                </div>
-                            </div>
-                            <div class="card-footer text-center">
-                                <button type="submit" class="btn btn-success">Analyze Video</button>
+                            <div class="mb-3">
+                                <label for="prompt" class="form-label">Analysis Prompt</label>
+                                <textarea id="prompt" name="prompt" rows="4" class="form-control" placeholder="Enter your analysis prompt here..."></textarea>
                             </div>
                         </div>
-                    </form>
+                        <div class="card-footer text-center">
+                            <button id="submit-btn" type="submit" class="btn btn-success">Analyze Video</button>
+                        </div>
+
+                        <!-- Progress Bar Card -->
+                        <div id="progress-card" class="card shadow-lg" style="position: absolute;padding-top: 1rem; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(255, 255, 255, 0.5); z-index: 1000; display: none; width: 80%; max-width: 600px;">
+                            <div class="card-body text-center"  style="background-color: transparent;">
+                                <h3 style="margin-bottom: 2.5rem;">Analysis Progress</h3>
+                                <div id="circle-progress" class="progress-container" style="position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                    <div class="progress-text">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 {% else %}
                     <div class="alert alert-info text-center" role="alert">
                         No video available for analysis. Please upload a video first.
@@ -48,5 +74,112 @@
             </div>
         </div>
     </div>
-{% endblock %}
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const submitBtn = document.getElementById('submit-btn');
+            const promptInput = document.getElementById('prompt');
+            const analyzedVideoInput = document.getElementById('analyze_video');
+            const progressCard = document.getElementById('progress-card');
+            const circleProgress = document.getElementById('circle-progress');
+            const progressText = document.querySelector('.progress-text');
+            const totalProgress = 100;
+            let currentProgress = 0;
+            let bar; // Declare bar outside the event listener
+
+            function updateProgress(progress) {
+                progressText.textContent = `${progress}%`;
+                // Update your circular progress bar here (using progressbar.js or similar)
+                // Example: bar.animate(progress / 100);
+            }
+                function startProgress(progg) {
+                    if (currentProgress < totalProgress) {
+                        currentProgress += progg; // Increase by 10% each time
+                        if (currentProgress > totalProgress) {
+                            currentProgress = totalProgress; // Cap at 100%
+                        }
+                        bar.animate(currentProgress / totalProgress, {
+                            duration: 800 // Animation duration for each step
+                        });
+                    }
+                }
+
+    
+            submitBtn.addEventListener('click', function(event) {
+                   event.preventDefault();
+                   submitBtn.disabled = true; // Disable the button to prevent multiple clicks
+                   submitBtn.textContent = 'Analyzing...'; // Change button text
+                   // Show the progress card
+                   progressCard.style.display = 'block';
+                   currentProgress = 0; // Reset progress on new analysis
+                   bar = new ProgressBar.Circle('#circle-progress', {
+                                                strokeWidth: 6,
+                                                easing: 'easeInOut',
+                                                duration: 1400,
+                                                color: '#4CAF50', // Green color
+                                                trailColor: '#eee',
+                                                trailWidth: 1,
+                                                svgStyle: null,
+                                                text: {
+                                                    // Initial value (will be updated by the text div)
+                                                    value: '',
+                                                    style: {
+                                                        color: '#999',
+                                                        padding: 0,
+                                                        margin: 0,
+                                                    
+                                                    }
+                                                },
+                                                step: function(state, circle) {
+                                                    // Update the custom text div with the current percentage
+                                                    const value = Math.round(circle.value() * 100);
+                                                    document.querySelector('.progress-text').textContent = value + '%';
+                                                }
+                                            });
+
+                                            // Set initial progress (e.g., 0%)
+                                            bar.set(0);
+
+                   const ws = new WebSocket('ws://localhost:8000/ws/analyze');
+
+                   ws.onopen = () => {
+                       console.log('WebSocket connection established');
+                       ws.send(JSON.stringify({
+                           "prompt": promptInput.value,
+                           "video_path": analyzedVideoInput.value
+                       }));
+                   };
+
+                   ws.onmessage = (event) => {
+                       console.log(event.data);
+                       // Assuming the backend sends progress updates in the format "progress: XX"
+                       if (event.data.startsWith("progress:")) {
+                           const progress = parseInt(event.data.split(":")[1]);
+                           startProgress(progress);
+
+                         }
+                                                
+                        };
+                    ws.onclose = () => {
+                       console.log('WebSocket connection closed');
+                       console.log("Current Progress:", currentProgress); // Check the value of currentProgress
+
+                       // Hide the progress card when analysis is complete
+                       progressCard.style.display = 'none';
+                       submitBtn.disabled = false; // Re-enable the button
+                       submitBtn.textContent = 'Analyze Video'; // Reset button text
+                   };
+
+                 
+                   ws.onerror = (error) => {
+                       console.error('WebSocket error:', error);
+                       // Hide the progress card on error
+                       progressCard.style.display = 'none';
+                   };
+               });
+             })
+    </script>
+{% endblock %}

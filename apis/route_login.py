@@ -9,7 +9,7 @@ from utils import MyHasher
 from apis.get_user_login import get_user,get_image_path,get_ref_code,get_user_points,get_user_id
 from database import get_db
 from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import Depends,WebSocket
 from fastapi import HTTPException
 from fastapi import Response
 from fastapi import status
@@ -36,6 +36,21 @@ def authenticate_user(email:str,password:str,db:Session = Depends(get_db)):
     
     return user
 
+async def get_current_user_websocket(websocket:WebSocket,db:Session = Depends(get_db)):
+
+     await websocket.accept()
+
+     cookie_str = websocket.headers.get("cookie","")
+     access_token = cookie_str[cookie_str.find("=")+1:cookie_str.find(";")].replace('Bearer ',"").replace('"',"")
+     if access_token:
+        id = decode_token(access_token)
+        user = get_user_id(id=id,db=db)
+        print(user.username)
+        print(user.referral_code)
+        if user:
+            return User(username=user.username)
+     else:
+        await websocket.close(code=1008)
 
 def get_current_user(token: str = Depends(oauth2_scheme),db:Session = Depends(get_db)):
     

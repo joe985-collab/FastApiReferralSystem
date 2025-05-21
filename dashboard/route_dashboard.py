@@ -1,11 +1,11 @@
-from apis.route_login import get_current_user,get_current_user_id, get_current_ref_code,get_current_user_points,get_current_image_path
+from apis.route_login import get_current_user,get_current_user_id, get_current_ref_code,get_current_user_points,get_current_user_websocket
 from database import get_db
 from fastapi import APIRouter,Form
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException,File,UploadFile
 from fastapi import Request,Response
-from fastapi import status
+from fastapi import status,WebSocket,WebSocketDisconnect
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from auth.forms import LoginForm
@@ -22,7 +22,9 @@ from schemas import Points,Transaction
 from database import get_db
 from faster_whisper import WhisperModel
 from decimal import Decimal
+import asyncio
 import os
+import json
 # Learn about webauthn library, fido and passkeys
 os.chdir(os.getcwd())
 templates = Jinja2Templates(directory="templates")
@@ -152,27 +154,65 @@ async def get_summary(request:Request,video_id:int,user_id:int,current_user: Use
      else:
           return templates.TemplateResponse("components/video_summary.html",{"request":request,"user":current_user,"video_summary":video_s.video_summary,"video_path":video_s.video_path})
      
-@router.post("/analyze-video")
-async def analyze_video(request:Request,analyze_video:str  = Form(...),prompt:str = Form(...),current_user:User = Depends(get_current_user),db:Session = Depends(get_db)):
+# @router.post("/analyze-video")
+# async def analyze_video(request:Request,background_tasks:BackgroundTasks,analyze_video:str  = Form(...),prompt:str = Form(...),current_user:User = Depends(get_current_user),db:Session = Depends(get_db)):
+     
+#      if not current_user:
+#           return None
+    
+  
+#      video_path  = f"static/{analyze_video}"
+
+#      model = "llama3.2:1b"
+
+#      video_summarizer = VideoSummarizer(video_path=video_path,model=model,prompt=prompt)
+#      try:
+#          current_summary,time_in_sec = video_summarizer.analyze_video()
+#      #     current_video = db.query(TempVideo).filter(TempVideo.file_path == video_path).first()
+#      #     new_summary = VideoSummary(user_id=current_video.user_id,video_id=current_video.id,video_summary=current_summary)
+# #   db.add(new_summary)
+# #   db.commit()
+#          print("Summary",current_summary)
+#          return {"elapsed_time":time_in_sec,"status":"success"}
+#      except Exception as e:
+#           raise HTTPException(status_code=500, detail=f'Something went wrong {e}')
+
+@router.websocket("/ws/analyze")
+async def analyze_video(websocket:WebSocket,current_user:User=Depends(get_current_user_websocket)):
      
      if not current_user:
           return None
     
-  
-     video_path  = f"static/{analyze_video}"
+
 
      model = "llama3.2:1b"
+     print(current_user)
 
-     video_summarizer = VideoSummarizer(video_path=video_path,model=model,prompt=prompt)
-     video_summarizer.analyze_video()
+     
      try:
-         current_summary,time_in_sec = video_summarizer.analyze_video()
+         data = json.loads(await websocket.receive_text())
+         
+         video_path  = f"static/{data["video_path"]}"
+
+         video_summarizer = VideoSummarizer(video_path=video_path,model=model,prompt=data["prompt"])
+
+         task = asyncio.create_task(video_summarizer.analyze_video(websocket))
+
+         while not task.done():
+              await asyncio.sleep(0.1)
+     except WebSocketDisconnect:
+             print("Client disconnected - canceling task")
+             task.cancel()
+     # except Exception as e:
+     #     await websocket.send_json({"status":"error","message":str(e)})
+     #     await websocket.close()
+           
+     #     current_summary,time_in_sec 
      #     current_video = db.query(TempVideo).filter(TempVideo.file_path == video_path).first()
      #     new_summary = VideoSummary(user_id=current_video.user_id,video_id=current_video.id,video_summary=current_summary)
 #   db.add(new_summary)
 #   db.commit()
-         print("Summary",current_summary)
-         return {"elapsed_time":time_in_sec,"status":"success"}
+     #     print("Summary",current_summary)
+     #     return {"elapsed_time":time_in_sec,"status":"success"}
      except Exception as e:
           raise HTTPException(status_code=500, detail=f'Something went wrong {e}')
-
