@@ -1,0 +1,482 @@
+{% extends "shared/dashboard.html" %}
+
+{% block title %}
+    <title>Video Gallery</title>
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block thumbnail %}
+{% endblock %}
+
+{% block style %}
+    <style>
+              .container-another {
+            max-width: 1200px;
+            margin: 0 auto;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; /* Keep for full height background */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 500px; /* Reduced height, as requested */
+            max-height: 800px; /* Added max-height */
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #ffffff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .video-grid-container { /* This wrapper helps control the positioning of cards */
+            position: relative; /* Crucial for positioning video-cards absolutely */
+            width: 100%;
+            max-width: 800px; /* Adjust this to control the max width of the display area for a single video */
+            flex-grow: 1; /* Allows it to take up available space in the column flex container */
+            display: flex; /* Make it a flex container to center the single card */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            min-height: 350px; /* Ensure enough height for the video card */
+            overflow: hidden; /* Hide cards that slide off screen */
+        }
+
+        .video-grid {
+            /* This div now serves as a dynamic content holder, not a grid layout itself */
+            /* Remove grid properties that control multiple columns */
+            /* display: grid; */
+            /* grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); */
+            /* gap: 20px; */
+
+            /* Instead, it will hold one video card which is absolutely positioned */
+            width: 100%; /* Take full width of its parent (.video-grid-container) */
+            height: 100%; /* Take full height of its parent */
+            display: flex; /* Helps ensure content inside is centered if it doesn't take 100% width */
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+            position: relative; /* Important: this will be the positioning context for video-cards */
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+
+            /* Positioning for single card display */
+            position: absolute; /* Allows cards to stack and transition without affecting flow */
+            width: 100%; /* Take full width of .video-grid */
+            max-width: 500px; /* Limit max width of the card itself */
+            height: auto; /* Let content define height */
+            /* Initial state for animations */
+            opacity: 0;
+            transform: translateX(100%); /* Start off-screen (e.g., to the right) */
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out; /* Smooth transition */
+        }
+        
+        .video-card.active {
+            opacity: 1; /* Fade in */
+            transform: translateX(0); /* Slide into center */
+            /* animation: fadeInUp 0.6s ease forwards; Remove this if you want to rely purely on CSS transitions */
+        }
+
+        /* --- Your existing video-card and its children styles --- */
+        .video-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .video-thumbnail {
+            position: relative;
+            overflow: hidden;
+            height: 180px;
+        }
+
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .video-card:hover .video-thumbnail img {
+            transform: scale(1.1);
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .video-card:hover .play-overlay {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-left: 14px solid #667eea;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            margin-left: 3px;
+        }
+
+        .card-content {
+            padding: 15px;
+            color: white;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .card-description {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .watch-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+
+        .watch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .video-duration {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 3px 6px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 10px;
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        /* Pagination styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            color: white;
+        }
+
+        .pagination button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .pagination-info {
+            margin: 0 10px;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px); /* Reduced transform */
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .video-card.active {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* Dynamic animation delays will be set via JavaScript */
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem; /* Reduced font size */
+            }
+            
+            .video-grid {
+                grid-template-columns: 1fr;
+                gap: 15px; /* Reduced gap */
+            }
+            
+            body {
+                padding: 10px;
+            }
+        }
+
+        /* Subtle floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .float-normal {
+            animation: fadeInUp 0.6s ease forwards, float 6s ease-in-out infinite;
+        }
+
+        .float-reverse {
+            animation: fadeInUp 0.6s ease forwards, float 6s ease-in-out infinite reverse;
+        }
+      
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-another rounded-bottom rounded-top">
+        <div class="header">
+            <h1>Video Gallery</h1>
+            <p>Discover amazing content crafted just for you</p>
+        </div>
+
+        <div class="video-grid-container">
+            <div class="video-grid" id="videoGrid">
+                <!-- Video cards will be dynamically inserted here -->
+                        {% for video in videos %}
+                <div class="video-card {% if loop.index == 1 %}active{% endif %}" data-video-id="{{ video.videoId }}">
+                    <div class="video-thumbnail">
+                        <img src="{{ video.thumbnailUrl }}" alt="{{ video.title }}" loading="lazy">
+                        <div class="play-overlay">
+                            <div class="play-icon"></div>
+                        </div>
+                        <div class="video-duration">{{ video.duration }}</div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">{{ video.title }}</h3>
+                        <p class="card-description">{{ video.description }}</p>
+                        <div class="card-footer">
+                            <div class="stats">
+                                <div class="stat-item">
+                                    <span>👁</span>
+                                    <span>{{ video.views }}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>❤️</span>
+                                    <span>{{ video.likes }}</span>
+                                </div>
+                            </div>
+                            <a href="{{ video.href }}" class="watch-btn" target="_blank" rel="noopener noreferrer">Watch Now</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            </div>
+        </div>
+
+        <div class="pagination">
+            <button id="prevBtn" disabled>Previous</button>
+            <span class="pagination-info">
+                <span id="currentPage">1</span>/<span id="totalPages">1</span>
+            </span>
+            <button id="nextBtn">Next</button>
+        </div>
+    </div>
+
+    <script>
+       document.addEventListener('DOMContentLoaded', function() {
+            const videos = {{ videos|tojson }}; // Access all video data here
+            const videoGrid = document.getElementById('videoGrid');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const currentPageSpan = document.getElementById('currentPage');
+            const totalPagesSpan = document.getElementById('totalPages');
+
+            const videosPerPage = 1;
+            let currentPage = 1;
+            let totalPages = Math.ceil(videos.length / videosPerPage);
+
+            // Get all video cards that were rendered by Jinja2
+            const allVideoCards = videoGrid.querySelectorAll('.video-card');
+
+            // --- `transitionVideoCard` function (renamed for clarity) ---
+            function transitionVideoCard(targetPage, oldPage, allCards) {
+                const targetIndex = targetPage - 1; // 0-based index for the new card
+                const oldIndex = oldPage - 1; // 0-based index for the old card
+
+                // Determine the direction of the transition
+                const direction = targetPage > oldPage ? 'next' : 'prev';
+
+                // Handle the outgoing card
+                if (oldPage > 0 && oldIndex >= 0 && oldIndex < allCards.length) {
+                    const oldCard = allCards[oldIndex];
+                    oldCard.classList.remove('active');
+                    if (direction === 'next') {
+                        oldCard.style.transform = 'translateX(-100%)'; // Slide left off-screen
+                    } else { // direction === 'prev'
+                        oldCard.style.transform = 'translateX(100%)'; // Slide right off-screen
+                    }
+                    oldCard.style.opacity = '0';
+                }
+
+                // Handle the incoming card
+                if (targetIndex >= 0 && targetIndex < allCards.length) {
+                    const newCard = allCards[targetIndex];
+                    // Set initial position for incoming card
+                    if (direction === 'next') {
+                        newCard.style.transform = 'translateX(100%)'; // Start from right
+                    } else { // direction === 'prev'
+                        newCard.style.transform = 'translateX(-100%)'; // Start from left
+                    }
+                    newCard.style.opacity = '0'; // Start invisible
+
+                    // Force reflow to ensure the initial transform is applied before the transition
+                    void newCard.offsetWidth;
+
+                    // Apply active class to trigger the transition to center
+                    newCard.classList.add('active');
+                    newCard.style.transform = 'translateX(0)'; // Slide into center
+                    newCard.style.opacity = '1'; // Fade in
+                }
+            }
+            // --- End of `transitionVideoCard` function ---
+
+
+            // Function to display the correct video card (wraps `transitionVideoCard`)
+            function displayVideo(pageNumber, direction) {
+                const oldPage = currentPage; // Store the current page before updating
+                currentPage = pageNumber; // Update global current page
+
+                transitionVideoCard(currentPage, oldPage, allVideoCards);
+                updatePaginationButtons();
+            }
+
+            // Function to update pagination buttons (unchanged)
+            function updatePaginationButtons() {
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages;
+                currentPageSpan.textContent = currentPage;
+                totalPagesSpan.textContent = totalPages;
+            }
+
+            // Event listener for previous button
+            prevBtn.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    displayVideo(currentPage - 1, 'prev');
+                }
+            });
+
+            // Event listener for next button
+            nextBtn.addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    displayVideo(currentPage + 1, 'next');
+                }
+            });
+
+            // Initial setup
+            totalPagesSpan.textContent = totalPages;
+            displayVideo(currentPage, 'initial'); // Display the first video on load
+            updatePaginationButtons();
+
+            // Add event listeners for each video card for click behavior
+            allVideoCards.forEach(videoCard => {
+                const watchBtn = videoCard.querySelector('.watch-btn');
+                videoCard.addEventListener('click', function(e) {
+                    // Prevent default watch button click behavior if clicked directly
+                    if (e.target !== watchBtn) {
+                        const videoHref = watchBtn.getAttribute('href');
+                        window.open(videoHref, '_blank');
+                        console.log(`Opening video (card click): ${videoCard.querySelector('.card-title').textContent} at ${videoHref}`);
+                    }
+                });
+                // Ensure watch button still works directly
+                watchBtn.addEventListener('click', function(e) {
+                    e.preventDefault(); // Stop default anchor behavior
+                    e.stopPropagation(); // Prevent this click from bubbling up to videoCard click
+                    window.open(this.getAttribute('href'), '_blank');
+                    console.log(`Watch button clicked for video: ${videoCard.querySelector('.card-title').textContent} - Opening ${this.getAttribute('href')}`);
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -154,13 +154,17 @@
                    };
 
                    ws.onmessage = (event) => {
-                       console.log(event.data);
                        // Assuming the backend sends progress updates in the format "progress: XX"
-                       if (event.data.startsWith("progress:")) {
-                           const progress = parseInt(event.data.split(":")[1]);
+                       const msg = event.data;
+                       if (msg.startsWith("progress:")) {
+                           const progress = parseInt(msg.split(":")[1]);
                            startProgress(progress);
 
                          }
+                          if (msg.startsWith("REDIRECT:")) {
+                                const path = msg.split(":")[1];  
+                                window.location.href = path;     
+                            }
                                                 
                         };
                     ws.onclose = () => {
@@ -171,6 +175,8 @@
                        progressCard.style.display = 'none';
                        submitBtn.disabled = false; // Re-enable the button
                        submitBtn.textContent = 'Analyze Video'; // Reset button text
+                       bar.set(0); // Reset the progress bar
+                       currentProgress = 0; // Reset progress
                    };
 
                  

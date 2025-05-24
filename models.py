@@ -79,6 +79,7 @@ class TempVideo(Base):
      filename = Column(String(255),nullable=False)
      file_path = Column(String(512),nullable=False)
      file_size_kb = Column(String,nullable=False)
+     thumbnail_path = Column(String(512))
      created_at = Column(TIMESTAMP(timezone=True),server_default=func.now())
 
 class VideoSummary(Base):

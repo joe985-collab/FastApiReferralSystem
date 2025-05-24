@@ -94,6 +94,4 @@ class VideoSummarizer():
         except Exception as e:
 
             return f"{e}"
-        finally:
-
-            await websocket.close()
+       
